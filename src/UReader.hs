@@ -118,7 +118,8 @@ instance Pretty RSSChannel where
 instance Pretty RSSItem where
   pretty RSSItem {..} =
     (bold (magenta (pretty rssItemTitle)) </> pretty rssItemLink) <$$>
-     indent 2 (maybe mempty (nest 2 . prettySoup . extDesc) rssItemDescription) <$$>
+     indent 2 (maybe mempty
+               (nest 2 . prettySoup False . extDesc) rssItemDescription) <$$>
     (pretty rssItemPubDate </> pretty rssItemAuthor)
 
 instance Pretty RSSGuid where
@@ -130,28 +131,53 @@ instance Pretty RSSGuid where
 extDesc :: String -> [Tag String]
 extDesc = canonicalizeTags . parseTags
 
-prettySoup :: [Tag String] -> Doc
-prettySoup []       = mempty
-prettySoup (x : xs) = case x of
-  TagText t -> text (L.filter isPrint t) <> prettySoup xs
+prettySoup :: Bool -> [Tag String] -> Doc
+prettySoup _   []       = mempty
+prettySoup raw (x : xs) = case x of
+  TagText t -> f t <> prettySoup raw xs
+    where
+      f = if raw then text else text . L.filter isPrint
+
   TagOpen t attrs -> maybe def closeTag $ L.lookup t rules
     where
       rules =
         [ "p"  --> \par -> linebreak <> par <> linebreak
         , "i"  --> underline
+        , "em" --> underline
         , "b"  --> bold
         , "a"  --> \desc -> blue desc <+> pretty (L.lookup "href" attrs)
+        , "br" --> (linebreak <>)
         , "ul" --> id
         , "li" --> \li -> green "*" <+> li <> linebreak
-        , "code" --> (onwhite . black)
-        ] where (-->) = (,)
-      def = red ("<" <> text t <+> def_attrs <> ">") <+> prettySoup xs
+        , "span" --> id
+        , "code" ~-> (onwhite . black)
+        , "img"  --> \desc -> blue desc <+> pretty (L.lookup "src" attrs)
+        , "pre"  ~-> \body -> linebreak <> align body <> linebreak
+
+        , "h1" --> heading
+        , "h2" --> heading
+        , "h3" --> heading
+        , "h4" --> heading
+        , "h5" --> heading
+        , "h6" --> heading
+
+        , "div" --> \body -> linebreak <> body <> linebreak
+        , "blockquote" --> indent 4
+        ]
+        where
+          a --> f = (a, f . prettySoup False)
+          a ~-> f = (a, f . prettySoup True)
+
+          heading body = linebreak <> bold (underline body) <> linebreak
+
+      def = red ("<" <> text t <+> def_attrs <> ">") <+> prettySoup raw xs
         where
           def_attrs = hcat $ punctuate space $ L.map pattr attrs
             where pattr (n, v) = text n <> "=" <> text v
 
-      closeTag m = m (prettySoup a) <> prettySoup (L.drop 1 b)
+      closeTag m = m a <> prettySoup raw (L.drop 1 b)
         where
           (a, b) = L.break (== TagClose t) xs
-  TagClose t -> red ("</" <> text t <> ">") <+> prettySoup xs
-  t          -> text (show t) <> prettySoup xs
+
+  TagClose t -> red ("</" <> text t <> ">") <+> prettySoup raw xs
+  t          -> text (show t) <> prettySoup raw xs

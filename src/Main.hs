@@ -78,7 +78,7 @@ run Feed    {..} = do
   forM_ broken $ \(url, e) ->
     hPrint stderr $ red $ text $ show url ++ " - " ++ show e
 
-  print $ pretty $ mconcat $ feeds
+  putDoc $ pretty $ mconcat $ feeds
 
 main :: IO ()
 main = getDefaultFeeds >>= (execParser optionsInfo $~) >>= run
