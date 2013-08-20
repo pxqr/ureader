@@ -21,7 +21,12 @@ source-repository head
 executable ureader
   default-language:    Haskell2010
   default-extensions:  OverloadedStrings
+                     , PatternGuards
                      , RecordWildCards
+                     , ViewPatterns
+
+                     , FlexibleInstances
+                     , FlexibleContexts
   hs-source-dirs:      src
   main-is:             Main.hs
   build-depends:       base       == 4.6.*
@@ -31,6 +36,9 @@ executable ureader
 
                      , bytestring == 0.10.*
                      , text       == 0.11.*
+
+                     , time
+                     , old-locale
 
                      , network == 2.4.*
                      , HTTP    == 4000.2.*

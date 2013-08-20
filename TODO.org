@@ -1,7 +1,7 @@
 * DONE options
 * DONE parallel fetch
+* DONE local time
 * TODO merge multiple feeds by time
-* TODO local time
 * TODO --new
 * TODO pretty renderer
 * TODO test rendering (many feeds, say 30-100)

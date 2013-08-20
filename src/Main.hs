@@ -1,5 +1,3 @@
-{-# LANGUAGE ViewPatterns      #-}
-{-# LANGUAGE FlexibleContexts  #-}
 module Main (main) where
 
 import Control.Applicative as A
@@ -68,10 +66,10 @@ parseFeedList :: String -> [URI]
 parseFeedList = mapMaybe parseURI . L.lines
 
 run :: Options -> IO ()
-run Preview {..} = getRSS feedURI >>= print . pretty
+run Preview {..} = getRSS feedURI >>= setCurrentZone >>= print . pretty
 run Feed    {..} = do
   urls  <- parseFeedList <$> Prelude.readFile feedList
-  feeds <- parallel $ L.map getRSS urls
+  feeds <- parallel $ L.map (getRSS >=> setCurrentZone) urls
   print $ pretty $ mconcat feeds
 
 main :: IO ()
