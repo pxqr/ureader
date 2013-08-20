@@ -94,12 +94,7 @@ instance Monoid RSSChannel where
       , rssItems = mergeBy cmpPubDate (rssItems a) (rssItems b)
       }
     where
-      cmpPubDate a' b'
-        = trace ("====" ++ show (rssItemPubDate a')
-                        ++ show (rssItemPubDate b')) (
-          on cmp  (parsePubDate <=< rssItemPubDate) a' b')
-        where
-          cmp a b = trace ("--------------------------------------------------------------------------------------------" ++ show a ++ show b) (a < b)
+      cmpPubDate = (>) `on` (parsePubDate <=< rssItemPubDate)
 
       mergeBy :: (a -> a -> Bool) -> [a] -> [a] -> [a]
       mergeBy _ [] xs = xs
@@ -126,7 +121,7 @@ instance Pretty RSSItem where
   pretty RSSItem {..} =
     blue (pretty rssItemTitle) </>
     pretty rssItemLink  </>
---    maybe mempty (prettySoup . extDesc) rssItemDescription </>
+        nest 4 (maybe mempty (prettySoup . extDesc) rssItemDescription) </>
     pretty rssItemAuthor </>
     pretty rssItemPubDate
 
