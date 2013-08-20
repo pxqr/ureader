@@ -1,8 +1,10 @@
 module Main (main) where
 
+import Control.Arrow
 import Control.Applicative as A
 import Control.Concurrent.ParallelIO
 import Control.Monad
+import Data.Either
 import Data.Implicit
 import Data.List as L
 import Data.Maybe
@@ -13,6 +15,7 @@ import Options.Applicative
 import Text.PrettyPrint.ANSI.Leijen hiding ((<$>), (<>))
 import System.Directory
 import System.FilePath (combine)
+import System.IO
 
 import UReader
 
@@ -69,8 +72,14 @@ run :: Options -> IO ()
 run Preview {..} = getRSS feedURI >>= setCurrentZone >>= print . pretty
 run Feed    {..} = do
   urls  <- parseFeedList <$> Prelude.readFile feedList
-  feeds <- parallel $ L.map (getRSS >=> setCurrentZone) urls
-  print $ pretty $ mconcat feeds
+  res   <- parallelE $ L.map (getRSS >=> setCurrentZone) urls
+  let urlfy = L.zipWith (\url -> either (Left .  (,) url) Right) urls
+  let (broken, feeds) = partitionEithers $ urlfy res
+
+  forM_ broken $ \(url, e) ->
+    hPrint stderr $ red $ text $ show url ++ " - " ++ show e
+
+  print $ pretty $ mconcat $ feeds
 
 main :: IO ()
 main = getDefaultFeeds >>= (execParser optionsInfo $~) >>= run
