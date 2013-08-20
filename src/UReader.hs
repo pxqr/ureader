@@ -113,17 +113,15 @@ instance Pretty RSSChannel where
     pretty rssTitle </>
     pretty rssLink </>
     pretty rssDescription </>
-    pretty rssPubDate </>
-    vsep (L.map pretty rssItems)
+    pretty rssPubDate <$$>
+    vcat (punctuate linebreak $ L.map pretty rssItems)
 
 
 instance Pretty RSSItem where
   pretty RSSItem {..} =
-    blue (pretty rssItemTitle) </>
-    pretty rssItemLink  </>
-        nest 4 (maybe mempty (prettySoup . extDesc) rssItemDescription) </>
-    pretty rssItemAuthor </>
-    pretty rssItemPubDate
+    (blue (pretty rssItemTitle) </> pretty rssItemLink) <$$>
+     nest 4 (maybe mempty (prettySoup . extDesc) rssItemDescription) <$$>
+    (pretty rssItemPubDate </> pretty rssItemAuthor)
 
 instance Pretty RSSGuid where
   pretty RSSGuid {..} =
@@ -140,8 +138,10 @@ prettySoup (x : xs) = case x of
   TagText t -> text t <> prettySoup xs
   TagOpen t _
     | t == "p"  -> linebreak <> prettySoup xs
-    | t == "i"  -> underline (prettySoup a) <> prettySoup b
-    | otherwise -> prettySoup xs
-    where (a, b) = L.break (== TagClose "i") xs
-  TagClose _ -> prettySoup xs
+    | t == "i"  -> let (a, b) = L.break (== TagClose "i") xs
+                   in underline (prettySoup a) <> prettySoup b
+    | t == "b"  -> let (a, b) = L.break (== TagClose "b") xs
+                   in bold (prettySoup a) <> prettySoup b
+    | otherwise -> red (text t) <> prettySoup xs
+  TagClose t -> red (text t) <> prettySoup xs
   t          -> text (show t) <> prettySoup xs
