@@ -1,6 +1,5 @@
 module Main (main) where
 
-import Control.Arrow
 import Control.Applicative as A
 import Control.Concurrent.ParallelIO
 import Control.Monad

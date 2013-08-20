@@ -17,7 +17,6 @@ import Data.Monoid
 import Data.List as L
 import Data.Text.Encoding as T
 import Data.Time
-import Data.Time.Format
 import Network.URI
 import Network.HTTP
 import Text.HTML.TagSoup
@@ -26,8 +25,6 @@ import Text.RSS.Import
 import Text.RSS.Syntax
 import Text.XML.Light.Input
 import System.Locale
-
-import Debug.Trace
 
 
 getRSS :: URI -> IO RSS
@@ -143,7 +140,7 @@ prettySoup (x : xs) = case x of
         [ "p"  --> \par -> linebreak <> par <> linebreak
         , "i"  --> underline
         , "b"  --> bold
-        , "a"  --> \text -> blue text <+> pretty (L.lookup "href" attrs)
+        , "a"  --> \desc -> blue desc <+> pretty (L.lookup "href" attrs)
         , "ul" --> id
         , "li" --> \li -> green "*" <+> li <> linebreak
         , "code" --> (onwhite . black)
