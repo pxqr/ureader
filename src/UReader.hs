@@ -10,6 +10,7 @@ import Control.Applicative
 import Control.Exception
 import Control.Monad
 import Data.ByteString as BS
+import Data.Char
 import Data.Function
 import Data.Implicit
 import Data.Monoid
@@ -119,8 +120,8 @@ instance Pretty RSSChannel where
 
 instance Pretty RSSItem where
   pretty RSSItem {..} =
-    (blue (pretty rssItemTitle) </> pretty rssItemLink) <$$>
-     nest 4 (maybe mempty (prettySoup . extDesc) rssItemDescription) <$$>
+    (bold (magenta (pretty rssItemTitle)) </> pretty rssItemLink) <$$>
+     indent 2 (maybe mempty (nest 2 . prettySoup . extDesc) rssItemDescription) <$$>
     (pretty rssItemPubDate </> pretty rssItemAuthor)
 
 instance Pretty RSSGuid where
@@ -135,13 +136,25 @@ extDesc = canonicalizeTags . parseTags
 prettySoup :: [Tag String] -> Doc
 prettySoup []       = mempty
 prettySoup (x : xs) = case x of
-  TagText t -> text t <> prettySoup xs
-  TagOpen t _
-    | t == "p"  -> linebreak <> prettySoup xs
-    | t == "i"  -> let (a, b) = L.break (== TagClose "i") xs
-                   in underline (prettySoup a) <> prettySoup b
-    | t == "b"  -> let (a, b) = L.break (== TagClose "b") xs
-                   in bold (prettySoup a) <> prettySoup b
-    | otherwise -> red (text t) <> prettySoup xs
-  TagClose t -> red (text t) <> prettySoup xs
+  TagText t -> text (L.filter isPrint t) <> prettySoup xs
+  TagOpen t attrs -> maybe def closeTag $ L.lookup t rules
+    where
+      rules =
+        [ "p"  --> \par -> linebreak <> par <> linebreak
+        , "i"  --> underline
+        , "b"  --> bold
+        , "a"  --> \text -> blue text <+> pretty (L.lookup "href" attrs)
+        , "ul" --> id
+        , "li" --> \li -> green "*" <+> li <> linebreak
+        , "code" --> (onwhite . black)
+        ] where (-->) = (,)
+      def = red ("<" <> text t <+> def_attrs <> ">") <+> prettySoup xs
+        where
+          def_attrs = hcat $ punctuate space $ L.map pattr attrs
+            where pattr (n, v) = text n <> "=" <> text v
+
+      closeTag m = m (prettySoup a) <> prettySoup (L.drop 1 b)
+        where
+          (a, b) = L.break (== TagClose t) xs
+  TagClose t -> red ("</" <> text t <> ">") <+> prettySoup xs
   t          -> text (show t) <> prettySoup xs
