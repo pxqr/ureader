@@ -120,7 +120,7 @@ instance Pretty RSSItem where
     (bold (magenta (pretty rssItemTitle)) </> pretty rssItemLink) <$$>
      indent 2 (maybe mempty
                (nest 2 . prettySoup False . extDesc) rssItemDescription) <$$>
-    (pretty rssItemPubDate </> pretty rssItemAuthor)
+    (yellow (pretty rssItemPubDate) </> red (pretty rssItemAuthor))
 
 instance Pretty RSSGuid where
   pretty RSSGuid {..} =
@@ -144,7 +144,11 @@ prettySoup raw (x : xs) = case x of
         [ "p"  --> \par -> linebreak <> par <> linebreak
         , "i"  --> underline
         , "em" --> underline
+        , "strong" --> bold
         , "b"  --> bold
+        , "tt" --> dullwhite
+        , "hr" --> \body -> body <> linebreak <>
+                            underline (text (L.replicate 72 ' ')) <> linebreak
         , "a"  --> \desc -> blue desc <+> pretty (L.lookup "href" attrs)
         , "br" --> (linebreak <>)
         , "ul" --> id
@@ -163,6 +167,11 @@ prettySoup raw (x : xs) = case x of
 
         , "div" --> \body -> linebreak <> body <> linebreak
         , "blockquote" --> indent 4
+
+        , "table" --> \body -> linebreak <> body <> linebreak
+        , "tbody" --> id
+        , "tr"    --> \body -> linebreak <> body <> linebreak
+        , "td"    --> fill 40
         ]
         where
           a --> f = (a, f . prettySoup False)
