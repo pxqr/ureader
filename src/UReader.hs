@@ -120,12 +120,14 @@ instance Pretty RSSItem where
     (bold (magenta (pretty rssItemTitle)) </> pretty rssItemLink) <$$>
      indent 2 (maybe mempty
                (nest 2 . prettySoup False . extDesc) rssItemDescription) <$$>
+    (green (pretty rssItemGuid)) <$$>
     (yellow (pretty rssItemPubDate) </> red (pretty rssItemAuthor))
 
 instance Pretty RSSGuid where
-  pretty RSSGuid {..} =
-    pretty rssGuidPermanentURL </>
-    pretty rssGuidValue
+  pretty RSSGuid {..}
+    | Just True <- rssGuidPermanentURL = "Permalink: " <+> pretty rssGuidValue
+    |          otherwise               = pretty rssGuidValue
+
 
 
 extDesc :: String -> [Tag String]
@@ -149,13 +151,13 @@ prettySoup raw (x : xs) = case x of
         , "tt" --> dullwhite
         , "hr" --> \body -> body <> linebreak <>
                             underline (text (L.replicate 72 ' ')) <> linebreak
-        , "a"  --> \desc -> blue desc <+> pretty (L.lookup "href" attrs)
+        , "a"  --> \desc -> blue desc </> pretty (L.lookup "href" attrs)
         , "br" --> (linebreak <>)
         , "ul" --> id
         , "li" --> \li -> green "*" <+> li <> linebreak
         , "span" --> id
         , "code" ~-> (onwhite . black)
-        , "img"  --> \desc -> blue desc <+> pretty (L.lookup "src" attrs)
+        , "img"  --> \desc -> blue desc </> pretty (L.lookup "src" attrs)
         , "pre"  ~-> \body -> linebreak <> align body <> linebreak
 
         , "h1" --> heading

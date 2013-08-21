@@ -11,10 +11,11 @@ import Data.Monoid
 import Data.Text.IO as T
 import Network.URI
 import Options.Applicative
-import Text.PrettyPrint.ANSI.Leijen hiding ((<$>), (<>))
+import Text.PrettyPrint.ANSI.Leijen hiding ((<$>), (<>), width)
 import System.Directory
 import System.FilePath (combine)
 import System.IO
+import System.Console.Terminal.Size as Terminal
 
 import UReader
 
@@ -78,7 +79,8 @@ run Feed    {..} = do
   forM_ broken $ \(url, e) ->
     hPrint stderr $ red $ text $ show url ++ " - " ++ show e
 
-  putDoc $ pretty $ mconcat $ feeds
+  Window {..} <- fromMaybe (Window 80 60) <$> Terminal.size
+  displayIO stdout $ renderPretty 0.8 width $ pretty $ mconcat $ feeds
 
 main :: IO ()
 main = getDefaultFeeds >>= (execParser optionsInfo $~) >>= run
