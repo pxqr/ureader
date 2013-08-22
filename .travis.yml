@@ -1,0 +1,10 @@
+language: haskell
+
+notifications:
+  email: false
+
+install:
+  cabal install --force-reinstalls --only-dependencies
+
+script:
+  cabal configure && cabal build
