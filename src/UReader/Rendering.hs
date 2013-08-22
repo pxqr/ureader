@@ -1,5 +1,5 @@
 {-# OPTIONS -fno-warn-orphans #-}
-module UReader ( renderRSS ) where
+module UReader.Rendering ( renderRSS ) where
 
 import Control.Applicative
 import Control.Monad
