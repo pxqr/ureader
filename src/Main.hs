@@ -4,68 +4,21 @@ import Control.Applicative as A
 import Control.Concurrent.ParallelIO
 import Control.Monad
 import Data.Either
-import Data.Implicit
 import Data.List as L
 import Data.Maybe
 import Data.Monoid
-import Data.Text.IO as T
 import Data.Time
 import Data.Time.Clock.POSIX
 import Network.URI
-import Options.Applicative
 import Text.PrettyPrint.ANSI.Leijen hiding ((<$>), (<>), (</>), width)
 import Text.Read
 import System.Directory
-import System.FilePath ((</>), (<.>))
+import System.FilePath ((<.>))
 import System.IO
 
 import UReader
+import UReader.Options
 
-
-data Options
-   = Preview { feedURI  :: URI  }
-   | Feed    { feedList :: FilePath
-             , newOnly  :: Bool
-             }
-     deriving Show
-
-previewParser :: Parser Options
-previewParser = Preview
-    <$> argument parseURI
-      ( metavar "URI"
-     <> help    "URI to feed"
-      )
-
-feedParser :: Implicit_ String => Parser Options
-feedParser = Feed
-    <$> option
-      ( long    "feeds"
-     <> metavar "PATH"
-     <> value   param_ <> showDefault
-     <> help    "Path to file with list of feed urls"
-      )
-    <*> switch
-      ( long "new"
-     <> help "Show only unread feed"
-      )
-
-optionsParser :: Implicit_ String => Parser Options
-optionsParser = previewParser <|> feedParser
-
-optionsInfo :: Implicit_ String => ParserInfo Options
-optionsInfo = info (helper <*> optionsParser) modifier
-  where
-    modifier = fullDesc <> progDesc "" <> header ""
-
-getDefaultFeeds :: IO FilePath
-getDefaultFeeds = do
-  udir <- getAppUserDataDirectory "ureader"
-  createDirectoryIfMissing False udir
-  let configPath = udir </> "feeds"
-  exist <- doesFileExist configPath
-  unless exist $ do
-    T.writeFile configPath ""
-  return configPath
 
 parseFeedList :: String -> [URI]
 parseFeedList = mapMaybe parseURI . L.lines
@@ -86,7 +39,8 @@ getLastSeen lastPath = do
 
 run :: Options -> IO ()
 run Preview {..} = getRSS feedURI >>= setCurrentZone >>= renderRSS
-run Feed    {..} = do
+run Batch   {..} = do
+  let Style {..} = feedStyle
   urls  <- parseFeedList <$> Prelude.readFile feedList
   res   <- parallelE $ L.map getRSS urls
   let urlfy = L.zipWith (\url -> either (Left .  (,) url) Right) urls
@@ -106,5 +60,7 @@ run Feed    {..} = do
 
   renderRSS . mconcat =<< setCurrentZone userFeed
 
+run opt = error $ "unsupported option" ++ show opt
+
 main :: IO ()
-main = getDefaultFeeds >>= (execParser optionsInfo $~) >>= run
+main = getOptions >>= run

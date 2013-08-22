@@ -2,7 +2,10 @@
 * DONE parallel fetch
 * DONE local time
 * DONE merge multiple feeds by time
+* DONE --new
+* DONE pretty renderer
+* TODO --rss-info
+* TODO order: --new-first, --old-first, --stream
+* TODO aliases
 * TODO parse nested html tags properly
-* TODO --new
-* TODO pretty renderer
 * TODO test rendering (many feeds, say 30-100)
