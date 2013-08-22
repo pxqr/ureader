@@ -37,6 +37,8 @@ executable ureader
 
                      , bytestring == 0.10.*
                      , text       == 0.11.*
+                     , containers
+                     , split
 
                      , time
                      , old-locale

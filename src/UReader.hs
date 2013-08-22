@@ -24,6 +24,8 @@ import Data.Implicit
 import Data.Maybe
 import Data.Monoid
 import Data.List as L
+import Data.List.Split as L
+import Data.Set as S
 import Data.Text.Encoding as T
 import Data.Time
 import Network.URI
@@ -103,17 +105,20 @@ instance LocalZone RSS where
 instance Monoid RSS where
   mempty  = nullRSS "" ""
   mappend a b = mempty
-      { rssVersion = rssVersion a <> ", " <> rssVersion b
+      { rssVersion = unwords $ S.toList $
+                     mergeVersions (rssVersion a) (rssVersion b)
       , rssAttrs   = rssAttrs   a <> rssAttrs   b
       , rssChannel = rssChannel a <> rssChannel b
       , rssOther   = rssOther   a <> rssOther   b
       }
+    where
+      mergeVersions = (<>) `on` S.fromList . words
 
 instance Monoid RSSChannel where
   mempty = nullChannel "" ""
   mappend a b = mempty
-      { rssTitle = rssTitle a <> ", " <> rssTitle b
-      , rssLink  = rssLink  a <> ", " <> rssLink  b
+      { rssTitle = rssTitle a <> "|" <> rssTitle b
+      , rssLink  = rssLink  a <> " " <> rssLink  b
       , rssDescription = rssDescription a
       , rssItems = mergeBy cmpPubDate (rssItems a) (rssItems b)
       }
@@ -130,16 +135,16 @@ instance Monoid RSSChannel where
 instance Pretty RSS where
   pretty RSS {..} =
     pretty rssChannel </>
-    pretty ("rss version" :: String) <+> pretty rssVersion
+    dullblack ("rss version" <+> pretty rssVersion)
 
 instance Pretty RSSChannel where
   pretty RSSChannel {..} =
-    pretty rssTitle </>
-    pretty rssLink </>
-    pretty rssDescription </>
-    pretty rssPubDate <$$>
-    vcat (punctuate linebreak $ L.map pretty rssItems)
-
+      vcat (L.zipWith heading (splitOn "|" rssTitle) (words rssLink)) </>
+      pretty rssDescription </>
+      pretty rssPubDate <$$>
+      vcat (punctuate linebreak $ L.map pretty rssItems)
+    where
+      heading title link = blue (fill 24 (text title)) </> text link
 
 instance Pretty RSSItem where
   pretty RSSItem {..} =
