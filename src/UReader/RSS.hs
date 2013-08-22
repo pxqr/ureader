@@ -1,10 +1,15 @@
 module UReader.RSS
-       ( getRSS
-       , filterItems
+       ( filterItems
+
+       , getRSS
+       , fetchFeeds
        ) where
 
+import Control.Applicative
+import Control.Concurrent.ParallelIO
 import Control.Exception
 import Data.ByteString as BS
+import Data.Either
 import Data.List as L
 import Data.Text.Encoding as T
 import Network.URI
@@ -30,3 +35,8 @@ getRSS uri = do
   rss  <- maybe (throwIO $ userError "invalid RSS") return $
             elementToRSS xml
   return rss
+
+fetchFeeds :: [URI] -> IO ([(URI, SomeException)], [RSS])
+fetchFeeds urls = (partitionEithers . urlfy) <$> parallelE (L.map getRSS urls)
+  where
+    urlfy = L.zipWith (\url -> either (Left .  (,) url) Right) urls

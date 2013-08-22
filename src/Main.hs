@@ -1,9 +1,8 @@
 module Main (main) where
 
 import Control.Applicative as A
-import Control.Concurrent.ParallelIO
+import Control.Exception
 import Control.Monad
-import Data.Either
 import Data.List as L
 import Data.Maybe
 import Data.Monoid
@@ -12,6 +11,7 @@ import Data.Time.Clock.POSIX
 import Network.URI
 import Text.PrettyPrint.ANSI.Leijen hiding ((<$>), (<>), (</>), width)
 import Text.Read
+import Text.RSS.Syntax
 import System.Directory
 import System.FilePath ((<.>))
 import System.IO
@@ -24,6 +24,9 @@ import UReader.RSS
 
 parseFeedList :: String -> [URI]
 parseFeedList = mapMaybe parseURI . L.lines
+
+getFeedList :: FilePath -> IO [URI]
+getFeedList feedList = parseFeedList <$> Prelude.readFile feedList
 
 getLastSeen :: FilePath -> IO UTCTime
 getLastSeen lastPath = do
@@ -39,30 +42,39 @@ getLastSeen lastPath = do
   where
     epochStart = posixSecondsToUTCTime 0
 
-run :: Options -> IO ()
-run Preview {..} = getRSS feedURI >>= setCurrentZone >>= renderRSS
-run Batch   {..} = do
-  let Style {..} = feedStyle
-  urls  <- parseFeedList <$> Prelude.readFile feedList
-  res   <- parallelE $ L.map getRSS urls
-  let urlfy = L.zipWith (\url -> either (Left .  (,) url) Right) urls
-  let (broken, feeds) = partitionEithers $ urlfy res
-
+putBroken :: [(URI, SomeException)] -> IO ()
+putBroken broken = do
   forM_ broken $ \(url, e) ->
     hPrint stderr $ red $ text $ show url ++ " - " ++ show e
 
-  userFeed <- if newOnly
-    then do
-      lastSeen  <- getLastSeen (feedList <.> "lastseen")
-      localTime <- utcToLocalTime <$> getCurrentTimeZone <*> pure lastSeen
-      print $ green $ "Showed from:" <+> text (formatPubDate localTime)
-      let isNew item = pubDate item > Just lastSeen
-      return $ L.map (filterItems isNew) feeds
-    else return feeds
+timestampExt :: FilePath
+timestampExt = "lastseen"
 
+filterNew :: FilePath -> [RSS] -> IO [RSS]
+filterNew feedList feeds = do
+  lastSeen  <- getLastSeen (feedList <.> timestampExt)
+  localTime <- utcToLocalTime <$> getCurrentTimeZone <*> pure lastSeen
+  print $ green $ "Showed from:" <+> text (formatPubDate localTime)
+  let isNew item = pubDate item > Just lastSeen
+  return $ L.map (filterItems isNew) feeds
+
+previewFeed :: URI -> IO ()
+previewFeed = getRSS >=> setCurrentZone >=> renderRSS
+
+showBatch :: Style -> FilePath -> [URI] -> IO ()
+showBatch Style {..} feedList uris = do
+  (broken, feeds) <- fetchFeeds uris
+  putBroken broken
+  userFeed <- if newOnly then filterNew feedList feeds else return feeds
   renderRSS . mconcat =<< setCurrentZone userFeed
 
-run opt = error $ "unsupported option" ++ show opt
+streamFeeds :: [URI] -> IO ()
+streamFeeds = error "not implemented"
+
+run :: Options -> IO ()
+run Preview {..} = previewFeed feedURI
+run Batch   {..} = getFeedList feedList >>= showBatch feedStyle feedList
+run Stream  {..} = getFeedList feedList >>= streamFeeds
 
 main :: IO ()
 main = getOptions >>= run
