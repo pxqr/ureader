@@ -3,7 +3,15 @@
 {-# OPTIONS -fno-warn-orphans #-}
 module UReader
        ( getRSS
-       , LocalZone (..), setCurrentZone
+       , renderRSS
+
+       , filterItems
+
+       , pubDate
+       , formatPubDate
+
+       , LocalZone (..)
+       , setCurrentZone
        ) where
 
 import Control.Applicative
@@ -13,6 +21,7 @@ import Data.ByteString as BS
 import Data.Char
 import Data.Function
 import Data.Implicit
+import Data.Maybe
 import Data.Monoid
 import Data.List as L
 import Data.Text.Encoding as T
@@ -20,11 +29,13 @@ import Data.Time
 import Network.URI
 import Network.HTTP
 import Text.HTML.TagSoup
-import Text.PrettyPrint.ANSI.Leijen hiding ((<$>), (<>))
+import Text.PrettyPrint.ANSI.Leijen hiding ((<$>), (<>), width)
 import Text.RSS.Import
 import Text.RSS.Syntax
 import Text.XML.Light.Input
+import System.IO
 import System.Locale
+import System.Console.Terminal.Size as Terminal
 
 
 getRSS :: URI -> IO RSS
@@ -37,10 +48,25 @@ getRSS uri = do
             elementToRSS xml
   return rss
 
+renderRSS :: RSS -> IO ()
+renderRSS feed = do
+  Window {..} <- fromMaybe (Window 80 60) <$> Terminal.size
+  displayIO stdout $ renderPretty 0.8 width $ pretty feed
+  Prelude.putStrLn ("" :: String)
+
+filterItems :: (RSSItem -> Bool) -> RSS -> RSS
+filterItems p rss = rss
+    { rssChannel = let ch = rssChannel rss
+                   in ch { rssItems = L.filter p (rssItems ch) }
+    } -- TODO use lens
+
+pubDate :: RSSItem -> Maybe UTCTime
+pubDate = parsePubDate <=< rssItemPubDate
+
 pubDateFormat :: String
 pubDateFormat = "%a, %e %b %Y %H:%M:%S %Z"
 
-parsePubDate :: String -> Maybe UTCTime
+parsePubDate :: DateString -> Maybe UTCTime
 parsePubDate = parseTime defaultTimeLocale pubDateFormat
 
 formatPubDate :: FormatTime t => t -> DateString

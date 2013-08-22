@@ -24,6 +24,7 @@ executable ureader
                      , PatternGuards
                      , RecordWildCards
                      , ViewPatterns
+                     , BangPatterns
 
                      , FlexibleInstances
                      , FlexibleContexts
