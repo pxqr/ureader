@@ -30,9 +30,9 @@ executable ureader
                      , FlexibleContexts
   hs-source-dirs:      src
   main-is:             Main.hs
-  other-modules:       UReader
-                       UReader.Localization
+  other-modules:       UReader.Localization
                        UReader.Options
+                       UReader.Rendering
                        UReader.RSS
 
   build-depends:       base       == 4.6.*

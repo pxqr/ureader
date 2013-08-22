@@ -16,9 +16,9 @@ import System.Directory
 import System.FilePath ((<.>))
 import System.IO
 
-import UReader
 import UReader.Localization
 import UReader.Options
+import UReader.Rendering
 import UReader.RSS
 
 
