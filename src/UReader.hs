@@ -1,16 +1,8 @@
 {-# OPTIONS -fno-warn-orphans #-}
-module UReader
-       ( getRSS
-       , renderRSS
-
-       , filterItems
-
-       ) where
+module UReader ( renderRSS ) where
 
 import Control.Applicative
-import Control.Exception
 import Control.Monad
-import Data.ByteString as BS
 import Data.Char
 import Data.Function
 import Data.Maybe
@@ -18,42 +10,20 @@ import Data.Monoid
 import Data.List as L
 import Data.List.Split as L
 import Data.Set as S
-import Data.Text.Encoding as T
-import Network.URI
-import Network.HTTP
 import Text.HTML.TagSoup
 import Text.PrettyPrint.ANSI.Leijen hiding ((<$>), (<>), width)
-import Text.RSS.Import
 import Text.RSS.Syntax
-import Text.XML.Light.Input
 import System.IO
 import System.Console.Terminal.Size as Terminal
 
 import UReader.Localization
 
 
-getRSS :: URI -> IO RSS
-getRSS uri = do
-  resp <- simpleHTTP $ Request uri GET [] ("" :: ByteString)
-  body <- getResponseBody resp
-  xml  <- maybe (throwIO $ userError "invalid XML") return $
-            parseXMLDoc (T.decodeUtf8 body)
-  rss  <- maybe (throwIO $ userError "invalid RSS") return $
-            elementToRSS xml
-  return rss
-
 renderRSS :: RSS -> IO ()
 renderRSS feed = do
   Window {..} <- fromMaybe (Window 80 60) <$> Terminal.size
   displayIO stdout $ renderPretty 0.8 width $ pretty feed
   Prelude.putStrLn ("" :: String)
-
-filterItems :: (RSSItem -> Bool) -> RSS -> RSS
-filterItems p rss = rss
-    { rssChannel = let ch = rssChannel rss
-                   in ch { rssItems = L.filter p (rssItems ch) }
-    } -- TODO use lens
-
 
 instance Monoid RSS where
   mempty  = nullRSS "" ""

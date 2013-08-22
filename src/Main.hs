@@ -17,8 +17,9 @@ import System.FilePath ((<.>))
 import System.IO
 
 import UReader
-import UReader.Options
 import UReader.Localization
+import UReader.Options
+import UReader.RSS
 
 
 parseFeedList :: String -> [URI]

@@ -31,8 +31,9 @@ executable ureader
   hs-source-dirs:      src
   main-is:             Main.hs
   other-modules:       UReader
-                       UReader.Options
                        UReader.Localization
+                       UReader.Options
+                       UReader.RSS
 
   build-depends:       base       == 4.6.*
                      , implicit-params
