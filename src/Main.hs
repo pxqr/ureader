@@ -18,6 +18,7 @@ import System.IO
 
 import UReader
 import UReader.Options
+import UReader.Localization
 
 
 parseFeedList :: String -> [URI]

@@ -1,5 +1,3 @@
-{-# LANGUAGE TypeSynonymInstances #-}
-{-# LANGUAGE OverlappingInstances #-}
 {-# OPTIONS -fno-warn-orphans #-}
 module UReader
        ( getRSS
@@ -7,11 +5,6 @@ module UReader
 
        , filterItems
 
-       , pubDate
-       , formatPubDate
-
-       , LocalZone (..)
-       , setCurrentZone
        ) where
 
 import Control.Applicative
@@ -20,14 +13,12 @@ import Control.Monad
 import Data.ByteString as BS
 import Data.Char
 import Data.Function
-import Data.Implicit
 import Data.Maybe
 import Data.Monoid
 import Data.List as L
 import Data.List.Split as L
 import Data.Set as S
 import Data.Text.Encoding as T
-import Data.Time
 import Network.URI
 import Network.HTTP
 import Text.HTML.TagSoup
@@ -36,8 +27,9 @@ import Text.RSS.Import
 import Text.RSS.Syntax
 import Text.XML.Light.Input
 import System.IO
-import System.Locale
 import System.Console.Terminal.Size as Terminal
+
+import UReader.Localization
 
 
 getRSS :: URI -> IO RSS
@@ -62,45 +54,6 @@ filterItems p rss = rss
                    in ch { rssItems = L.filter p (rssItems ch) }
     } -- TODO use lens
 
-pubDate :: RSSItem -> Maybe UTCTime
-pubDate = parsePubDate <=< rssItemPubDate
-
-pubDateFormat :: String
-pubDateFormat = "%a, %e %b %Y %H:%M:%S %Z"
-
-parsePubDate :: DateString -> Maybe UTCTime
-parsePubDate = parseTime defaultTimeLocale pubDateFormat
-
-formatPubDate :: FormatTime t => t -> DateString
-formatPubDate = formatTime defaultTimeLocale pubDateFormat
-
-localizeUTC :: Implicit_ TimeZone => UTCTime -> LocalTime
-localizeUTC = utcToLocalTime param_
-
-setCurrentZone :: LocalZone a => a -> IO a
-setCurrentZone x = (localize x $~) <$> getCurrentTimeZone
-
-class LocalZone a where
-  localize :: Implicit_ TimeZone => a -> a
-
-instance (Functor f, LocalZone a) => LocalZone (f a) where
-  localize = fmap localize
-
-instance LocalZone DateString where
-  localize ds = maybe ds (formatPubDate . localizeUTC) $ parsePubDate ds
-
-instance LocalZone RSSItem where
-  localize item = item { rssItemPubDate = localize (rssItemPubDate item) }
-
-instance LocalZone RSSChannel where
-  localize chan @ RSSChannel {..} = chan
-    { rssPubDate    = localize rssPubDate
-    , rssLastUpdate = localize rssLastUpdate
-    , rssItems      = fmap localize rssItems
-    }
-
-instance LocalZone RSS where
-  localize rss @ RSS {..} = rss { rssChannel = localize rssChannel }
 
 instance Monoid RSS where
   mempty  = nullRSS "" ""
