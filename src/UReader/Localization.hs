@@ -16,7 +16,6 @@ import Data.Time
 import Text.RSS.Syntax
 import System.Locale
 
-
 pubDate :: RSSItem -> Maybe UTCTime
 pubDate = parsePubDate <=< rssItemPubDate
 

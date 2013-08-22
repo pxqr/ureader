@@ -10,7 +10,6 @@ import Data.Time
 import Data.Time.Clock.POSIX
 import Network.URI
 import Text.PrettyPrint.ANSI.Leijen hiding ((<$>), (<>), (</>), width)
-import Text.Read
 import Text.RSS.Syntax
 import System.Directory
 import System.FilePath ((<.>))
@@ -28,16 +27,17 @@ parseFeedList = mapMaybe parseURI . L.lines
 getFeedList :: FilePath -> IO [URI]
 getFeedList feedList = parseFeedList <$> Prelude.readFile feedList
 
+
 getLastSeen :: FilePath -> IO UTCTime
 getLastSeen lastPath = do
     exist <- doesFileExist lastPath
     if exist
       then do
-        !mLastSeen <- readMaybe <$> Prelude.readFile lastPath
-        Prelude.writeFile lastPath . show =<< getCurrentTime
+        !mLastSeen <- parsePubDate <$> Prelude.readFile lastPath
+        Prelude.writeFile lastPath . formatPubDate =<< getCurrentTime
         return $ fromMaybe epochStart mLastSeen
       else do
-        Prelude.writeFile lastPath . show =<< getCurrentTime
+        Prelude.writeFile lastPath . formatPubDate =<< getCurrentTime
         return epochStart
   where
     epochStart = posixSecondsToUTCTime 0
