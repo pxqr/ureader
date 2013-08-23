@@ -24,7 +24,7 @@ renderRSS desc feed = do
   Window {..} <- fromMaybe (Window 80 60) <$> Terminal.size
   let pp = vcat . punctuate linebreak . L.map pretty . rssItems . rssChannel
   let doc = if desc then pretty feed else pp feed
-  displayIO stdout $ renderPretty 0.8 width $ doc -- </> linebreak
+  displayIO stdout $ renderPretty 0.8 width $ doc
 
 instance Monoid RSS where
   mempty  = nullRSS "" ""
