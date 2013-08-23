@@ -30,18 +30,25 @@ styleParser :: Parser Style
 styleParser = Style
     <$> option
       ( long    "order"
+     <> short   'o'
+     <> metavar "ORDER"
+     <> value NewFirst <> showDefault
      <> help    "Specifies entries order: either NewFirst or OldFirst"
       )
     <*> switch
       ( long    "description"
+     <> short   'd'
      <> help    "Show auxilary info like rss version and channel title"
       )
     <*> switch
       ( long    "merge"
+     <> short   'm'
+     <> help    "Merge multiple feed info one by time"
       )
     <*> switch
       ( long    "unread"
-     <> help    "Show only unread feed"
+     <> short   'u'
+     <> help    "Show only unread feed and ignore feed will shown in future"
       )
 
 feedListParser :: Implicit_ FilePath => Parser FilePath
