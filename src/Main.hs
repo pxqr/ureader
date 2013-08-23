@@ -54,9 +54,12 @@ filterNew :: FilePath -> [RSS] -> IO [RSS]
 filterNew feedList feeds = do
   lastSeen  <- getLastSeen (feedList <.> timestampExt)
   localTime <- utcToLocalTime <$> getCurrentTimeZone <*> pure lastSeen
-  print $ green $ "Showed from:" <+> text (formatPubDate localTime)
   let isNew item = pubDate item > Just lastSeen
-  return $ L.map (filterItems isNew) feeds
+  let userFeeds  =  L.map (filterItems isNew) feeds
+  unless (L.all emptyFeed userFeeds) $
+    print $ green $ "Showed from:" <+> text (formatPubDate localTime)
+  return userFeeds
+
 
 previewFeed :: URI -> IO ()
 previewFeed = getRSS >=> setCurrentZone >=> renderRSS True

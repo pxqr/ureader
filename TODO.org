@@ -4,8 +4,8 @@
 * DONE merge multiple feeds by time
 * DONE --new
 * DONE pretty renderer
-* TODO --rss-info
-* TODO order: --new-first, --old-first, --stream
-* TODO aliases
+* DONE --desc
+* TODO order: --new-first, --old-first
+* TODO stream command
 * TODO parse nested html tags properly
 * TODO test rendering (many feeds, say 30-100)

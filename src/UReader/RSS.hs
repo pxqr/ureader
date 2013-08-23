@@ -1,5 +1,6 @@
 module UReader.RSS
        ( filterItems
+       , emptyFeed
 
        , getRSS
        , fetchFeeds
@@ -25,6 +26,8 @@ filterItems p rss = rss
                    in ch { rssItems = L.filter p (rssItems ch) }
     } -- TODO use lens
 
+emptyFeed :: RSS -> Bool
+emptyFeed = L.null . rssItems . rssChannel
 
 getRSS :: URI -> IO RSS
 getRSS uri = do
