@@ -20,21 +20,21 @@ data Order = NewFirst
              deriving (Show, Read, Eq, Ord, Bounded, Enum)
 
 data Style = Style
-  { feedOrder  :: Order
-  , feedMInfo  :: Bool
-  , feedMerge  :: Bool
-  , newOnly    :: Bool
+  { feedOrder :: Order
+  , feedDesc  :: Bool
+  , feedMerge :: Bool
+  , newOnly   :: Bool
   } deriving (Show, Eq)
 
 styleParser :: Parser Style
 styleParser = Style
     <$> option
       ( long    "order"
-     <> help    ""
+     <> help    "Specifies entries order: either NewFirst or OldFirst"
       )
     <*> switch
-      ( long    "feed-info"
-     <> help    "Show auxilary info like rss version and"
+      ( long    "description"
+     <> help    "Show auxilary info like rss version and channel title"
       )
     <*> switch
       ( long    "merge"

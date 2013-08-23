@@ -19,10 +19,12 @@ import System.Console.Terminal.Size as Terminal
 import UReader.Localization
 
 
-renderRSS :: RSS -> IO ()
-renderRSS feed = do
+renderRSS :: Bool -> RSS -> IO ()
+renderRSS desc feed = do
   Window {..} <- fromMaybe (Window 80 60) <$> Terminal.size
-  displayIO stdout $ renderPretty 0.8 width $ pretty feed
+  let pp = vcat . punctuate linebreak . L.map pretty . rssItems . rssChannel
+  let doc = if desc then pretty feed else pp feed
+  displayIO stdout $ renderPretty 0.8 width doc
   Prelude.putStrLn ("" :: String)
 
 instance Monoid RSS where

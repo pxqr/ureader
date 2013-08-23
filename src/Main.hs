@@ -59,14 +59,14 @@ filterNew feedList feeds = do
   return $ L.map (filterItems isNew) feeds
 
 previewFeed :: URI -> IO ()
-previewFeed = getRSS >=> setCurrentZone >=> renderRSS
+previewFeed = getRSS >=> setCurrentZone >=> renderRSS True
 
 showBatch :: Style -> FilePath -> [URI] -> IO ()
 showBatch Style {..} feedList uris = do
   (broken, feeds) <- fetchFeeds uris
   putBroken broken
   userFeed <- if newOnly then filterNew feedList feeds else return feeds
-  renderRSS . mconcat =<< setCurrentZone userFeed
+  renderRSS feedDesc . mconcat =<< setCurrentZone userFeed
 
 streamFeeds :: [URI] -> IO ()
 streamFeeds = error "not implemented"
