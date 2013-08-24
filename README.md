@@ -1,4 +1,4 @@
-# Description
+### Description
 
 `ureader` is minimalistic command line RSS reader with unicode and
 color support. Everything it does is fetch RSS documents, merge them
@@ -14,18 +14,19 @@ UReader aims to be:
 * pretty - preserve as much formatting as posssible. Currently ureader
   support some frequently used subset of HTML.
 
-# Examples
+### Examples
 
 The sample produced by `$ ureader feed --unread | more`:
 
 ![sample][sample]
 
-# Documentation
+### Documentation
 
 For help see `$ ureader --help` and `$ ureader COMMAND --help`.
+
 For usage see [USAGE][USAGE.md] document.
 
-# Install
+### Install
 
 Recommended way to install the package in Debian is:
 
@@ -37,9 +38,9 @@ $ git clone git://github.com/pxqr/ureader.git && cd ureader && cabal install
 
 and add `~/.cabal/bin` to the `PATH`, if not already.
 
-# Build Status [![Build Status][travis-img]][travis-log]
+### Build Status [![Build Status][travis-img]][travis-log]
 
-# Maintainer <pxqr.sta@gmail.com>
+### Maintainer <pxqr.sta@gmail.com>
 
 You can report any issues at [Issue tracker][issues].
 
