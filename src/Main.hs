@@ -74,8 +74,9 @@ streamFeeds :: [URI] -> IO ()
 streamFeeds = error "not implemented"
 
 run :: Options -> IO ()
-run Preview {..} = previewFeed feedURI
+run Add     {..} = appendFile feedList $ show feedURI ++ "\n"
 run Batch   {..} = getFeedList feedList >>= showBatch feedStyle feedList
+run Preview {..} = previewFeed feedURI
 run Stream  {..} = getFeedList feedList >>= streamFeeds
 
 main :: IO ()

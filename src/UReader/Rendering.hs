@@ -49,7 +49,7 @@ prettyDesc :: Bool -> RSS -> Doc
 prettyDesc keepDesc
   | keepDesc  = pretty
   | otherwise
-  = vcat . punctuate linebreak . L.map pretty . rssItems . rssChannel
+  = vsep . punctuate linebreak . L.map pretty . rssItems . rssChannel
 
 merge :: Bool -> [RSS] -> [RSS]
 merge byTime

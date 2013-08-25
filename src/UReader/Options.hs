@@ -57,20 +57,23 @@ feedLinkParser = argument parseURI
    )
 
 data Options
-   = Preview { feedURI    :: URI  }
-   | Stream  { feedList   :: FilePath }
+   = Add     { feedList   :: FilePath
+             , feedURI    :: URI
+             }
    | Batch   { feedList   :: FilePath
              , feedStyle  :: Style
              }
+   | Preview { feedURI    :: URI  }
+   | Stream  { feedList   :: FilePath }
      deriving (Show, Eq)
 
-previewParser :: Parser Options
-previewParser = Preview <$> feedLinkParser
+addParser :: Implicit_ String => Parser Options
+addParser = Add <$> feedListParser <*> feedLinkParser
 
-previewInfo :: ParserInfo Options
-previewInfo = info (helper <*> previewParser) modifier
+addInfo :: Implicit_ String => ParserInfo Options
+addInfo = info (helper <*> addParser) modifier
   where
-    modifier = progDesc "Show feed at specified URI"
+    modifier = progDesc "Add a feed to the feed list"
 
 streamParser :: Implicit_ String => Parser Options
 streamParser = Stream <$> feedListParser
@@ -78,7 +81,7 @@ streamParser = Stream <$> feedListParser
 streamInfo :: Implicit_ String => ParserInfo Options
 streamInfo = info (helper <*> streamParser) modifier
   where
-    modifier = progDesc "Show stream"
+    modifier = progDesc "Show feed as never ending stream"
 
 feedParser :: Implicit_ String => Parser Options
 feedParser = Batch <$> feedListParser <*> styleParser
@@ -88,11 +91,20 @@ feedInfo = info (helper <*> feedParser) modifier
   where
     modifier = progDesc "Show feed"
 
+previewParser :: Parser Options
+previewParser = Preview <$> feedLinkParser
+
+previewInfo :: ParserInfo Options
+previewInfo = info (helper <*> previewParser) modifier
+  where
+    modifier = progDesc "Show feed at specified URI"
+
 optionsParser :: Implicit_ String => Parser Options
 optionsParser = subparser $ mconcat
-  [ command "view"   previewInfo
-  , command "stream" streamInfo
+  [ command "add"    addInfo
   , command "feed"   feedInfo
+  , command "stream" streamInfo
+  , command "view"   previewInfo
   ]
 
 optionsInfo :: Implicit_ String => ParserInfo Options

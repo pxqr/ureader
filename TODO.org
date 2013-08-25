@@ -8,11 +8,12 @@
 * DONE order: --new-first, --old-first
 * DONE show comments, e.g.: http://www.gorillavsbear.net/category/mp3/feed/
 * DONE https
-* TODO atom
-* TODO show images
-* TODO add command, e.g.: ureader add $GROUP $URI
-* TODO cache
-* TODO groups, e.g.: ureader feed new $GROUP | more
+* WONT groups, e.g.: ureader feed new $GROUP | more
+* WONT show images
+* DONE add command, e.g.: ureader add $GROUP $URI
+* TODO --version flag
 * TODO stream command
+* TODO atom
+* TODO cache
 * TODO parse nested html tags properly
 * TODO test rendering (many feeds, say 30-100)
