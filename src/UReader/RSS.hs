@@ -5,6 +5,8 @@ module UReader.RSS
 
        , getRSS
        , fetchFeeds
+
+       , resolveComments
        ) where
 
 import Control.Applicative
@@ -50,3 +52,6 @@ fetchFeeds :: [URI] -> IO ([(URI, SomeException)], [RSS])
 fetchFeeds urls = (partitionEithers . urlfy) <$> parallelE (L.map getRSS urls)
   where
     urlfy = L.zipWith (\url -> either (Left .  (,) url) Right) urls
+
+resolveComments :: RSS -> IO RSS
+resolveComments = error "resolveComments"

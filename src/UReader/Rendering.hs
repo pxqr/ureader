@@ -18,6 +18,7 @@ import Data.Set as S
 import Text.HTML.TagSoup
 import Text.PrettyPrint.ANSI.Leijen hiding ((<$>), (<>), width)
 import Text.RSS.Syntax
+import Text.XML.Light.Types
 import System.IO
 import System.Console.Terminal.Size as Terminal
 
@@ -116,17 +117,31 @@ instance Pretty RSSChannel where
 instance Pretty RSSItem where
   pretty RSSItem {..} =
     (bold (magenta (pretty rssItemTitle)) </> pretty rssItemLink) <$$>
+    red   (hsep $ L.map ppCategory rssItemCategories) <$$>
      indent 2 (maybe mempty
                (nest 2 . prettySoup False . extDesc) rssItemDescription) <$$>
-    (green (pretty rssItemGuid)) <$$>
-    (yellow (pretty rssItemPubDate) </> red (pretty rssItemAuthor))
+    (dullblack "Comments: " <+> (pretty rssItemComments)) <$$>
+    (green (pretty rssItemGuid))            <$$>
+    (yellow (pretty rssItemPubDate) </>
+      "posted by" <+> red (pretty rssItemAuthor))
+
+    where
+      ppCategory x = dullblack "*" <> pretty x
+
 
 instance Pretty RSSGuid where
   pretty RSSGuid {..}
-    | Just True <- rssGuidPermanentURL = "Permalink: " <+> pretty rssGuidValue
-    |          otherwise               = pretty rssGuidValue
+    | Just True <- rssGuidPermanentURL = "Permalink:" <+> pretty rssGuidValue
+    |          otherwise               = "Link:     " <+> pretty rssGuidValue
 
+instance Pretty RSSCategory where
+  pretty RSSCategory {..} =
+    dullyellow (maybe mempty text rssCategoryDomain) <>
+    dullred    (hsep $ L.map pretty rssCategoryAttrs)  <>
+    dullblue   (text rssCategoryValue)
 
+instance Pretty Attr where
+  pretty Attr {..} = text (show attrKey) <+> "=" <+> text attrVal
 
 extDesc :: String -> [Tag String]
 extDesc = canonicalizeTags . parseTags

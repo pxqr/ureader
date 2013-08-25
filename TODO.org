@@ -7,9 +7,10 @@
 * DONE --desc
 * DONE order: --new-first, --old-first
 * TODO show comments, e.g.: http://www.gorillavsbear.net/category/mp3/feed/
+* TODO https
+* TODO show images
 * TODO add command, e.g.: ureader add $GROUP $URI
 * TODO cache
-* TODO https
 * TODO groups, e.g.: ureader feed new $GROUP | more
 * TODO stream command
 * TODO parse nested html tags properly
