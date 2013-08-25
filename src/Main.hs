@@ -8,12 +8,15 @@ import Data.List as L
 import Data.Maybe
 import Data.Time
 import Data.Time.Clock.POSIX
+import Data.Version (showVersion)
 import Network.URI
 import Text.PrettyPrint.ANSI.Leijen hiding ((<$>), (<>), (</>), width)
 import Text.RSS.Syntax
 import System.Directory
 import System.FilePath ((<.>))
 import System.IO
+
+import Paths_ureader
 
 import UReader.Localization
 import UReader.Options
@@ -78,6 +81,7 @@ run Add     {..} = appendFile feedList $ show feedURI ++ "\n"
 run Batch   {..} = getFeedList feedList >>= showBatch feedStyle feedList
 run Preview {..} = previewFeed feedURI
 run Stream  {..} = getFeedList feedList >>= streamFeeds
+run Version      = putStrLn $ "ureader version " ++ showVersion version
 
 main :: IO ()
 main = getOptions >>= run

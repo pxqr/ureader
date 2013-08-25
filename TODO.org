@@ -11,7 +11,7 @@
 * WONT groups, e.g.: ureader feed new $GROUP | more
 * WONT show images
 * DONE add command, e.g.: ureader add $GROUP $URI
-* TODO --version flag
+* DONE --version flag
 * TODO stream command
 * TODO atom
 * TODO cache

@@ -65,6 +65,7 @@ data Options
              }
    | Preview { feedURI    :: URI  }
    | Stream  { feedList   :: FilePath }
+   | Version
      deriving (Show, Eq)
 
 addParser :: Implicit_ String => Parser Options
@@ -99,6 +100,14 @@ previewInfo = info (helper <*> previewParser) modifier
   where
     modifier = progDesc "Show feed at specified URI"
 
+versionParser :: Parser Options
+versionParser = flag' Version
+    ( long  "version"
+   <> short 'V'
+   <> hidden
+   <> help  "Show program version and exit"
+    )
+
 optionsParser :: Implicit_ String => Parser Options
 optionsParser = subparser $ mconcat
   [ command "add"    addInfo
@@ -108,7 +117,7 @@ optionsParser = subparser $ mconcat
   ]
 
 optionsInfo :: Implicit_ String => ParserInfo Options
-optionsInfo = info (helper <*> optionsParser) modifier
+optionsInfo = info (helper <*> (versionParser <|> optionsParser)) modifier
   where
     modifier = fullDesc <> progDesc "" <> header ""
 
