@@ -1,9 +1,14 @@
 {-# OPTIONS -fno-warn-orphans #-}
-module UReader.Rendering ( renderRSS ) where
+module UReader.Rendering
+       ( Order (..)
+       , Style (..)
+       , renderRSS
+       ) where
 
 import Control.Applicative
 import Control.Monad
 import Data.Char
+import Data.Default
 import Data.Function
 import Data.Maybe
 import Data.Monoid
@@ -16,15 +21,53 @@ import Text.RSS.Syntax
 import System.IO
 import System.Console.Terminal.Size as Terminal
 
+import UReader.RSS
 import UReader.Localization
 
 
-renderRSS :: Bool -> RSS -> IO ()
-renderRSS desc feed = do
+data Order = NewFirst
+           | OldFirst
+             deriving (Show, Read, Eq, Ord, Bounded, Enum)
+
+data Style = Style
+  { feedOrder :: !Order
+  , feedDesc  :: !Bool
+  , feedMerge :: !Bool
+  , newOnly   :: !Bool
+  } deriving (Show, Eq)
+
+instance Default Style where
+  def = Style
+    { feedOrder = NewFirst
+    , feedDesc  = True
+    , feedMerge = False
+    , newOnly   = False
+    }
+
+prettyDesc :: Bool -> RSS -> Doc
+prettyDesc keepDesc
+  | keepDesc  = pretty
+  | otherwise
+  = vcat . punctuate linebreak . L.map pretty . rssItems . rssChannel
+
+merge :: Bool -> [RSS] -> [RSS]
+merge byTime
+  |   byTime  = return . mconcat
+  | otherwise = id
+
+formatOrder :: Order -> RSS -> RSS
+formatOrder NewFirst = id
+formatOrder OldFirst = reverseItems
+
+formatFeeds :: Style -> [RSS] -> [Doc]
+formatFeeds Style {..}
+  = L.map (prettyDesc feedDesc . formatOrder feedOrder) . merge feedMerge
+
+renderRSS :: Style -> [RSS] -> IO ()
+renderRSS style feeds = do
   Window {..} <- fromMaybe (Window 80 60) <$> Terminal.size
-  let pp = vcat . punctuate linebreak . L.map pretty . rssItems . rssChannel
-  let doc = if desc then pretty feed else pp feed
-  displayIO stdout $ renderPretty 0.8 width $ doc
+  forM_ (formatFeeds style feeds) $
+    displayIO stdout . renderPretty 0.8 width
 
 instance Monoid RSS where
   mempty  = nullRSS "" ""
@@ -95,7 +138,7 @@ prettySoup raw (x : xs) = case x of
     where
       f = if raw then text else text . L.filter isPrint
 
-  TagOpen t attrs -> maybe def closeTag $ L.lookup t rules
+  TagOpen t attrs -> maybe err closeTag $ L.lookup t rules
     where
       rules =
         [ "p"  --> \par -> linebreak <> par <> linebreak
@@ -136,7 +179,7 @@ prettySoup raw (x : xs) = case x of
 
           heading body = linebreak <> bold (underline body) <> linebreak
 
-      def = red ("<" <> text t <+> def_attrs <> ">") <+> prettySoup raw xs
+      err = red ("<" <> text t <+> def_attrs <> ">") <+> prettySoup raw xs
         where
           def_attrs = hcat $ punctuate space $ L.map pattr attrs
             where pattr (n, v) = text n <> "=" <> text v

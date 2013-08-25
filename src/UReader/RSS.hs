@@ -1,5 +1,6 @@
 module UReader.RSS
        ( filterItems
+       , reverseItems
        , emptyFeed
 
        , getRSS
@@ -25,6 +26,12 @@ filterItems p rss = rss
     { rssChannel = let ch = rssChannel rss
                    in ch { rssItems = L.filter p (rssItems ch) }
     } -- TODO use lens
+
+reverseItems :: RSS -> RSS
+reverseItems rss = rss
+  { rssChannel = let ch = rssChannel rss
+                 in ch { rssItems = L.reverse (rssItems ch) }
+  }
 
 emptyFeed :: RSS -> Bool
 emptyFeed = L.null . rssItems . rssChannel

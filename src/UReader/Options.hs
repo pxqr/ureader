@@ -14,17 +14,8 @@ import Options.Applicative
 import System.Directory
 import System.FilePath
 
+import UReader.Rendering
 
-data Order = NewFirst
-           | OldFirst
-             deriving (Show, Read, Eq, Ord, Bounded, Enum)
-
-data Style = Style
-  { feedOrder :: Order
-  , feedDesc  :: Bool
-  , feedMerge :: Bool
-  , newOnly   :: Bool
-  } deriving (Show, Eq)
 
 styleParser :: Parser Style
 styleParser = Style

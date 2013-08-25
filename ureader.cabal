@@ -37,6 +37,7 @@ executable ureader
 
   build-depends:       base       == 4.*
                      , implicit-params == 0.2.*
+                     , data-default
 
                      , parallel-io == 0.3.*
 

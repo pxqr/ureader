@@ -3,9 +3,9 @@ module Main (main) where
 import Control.Applicative as A
 import Control.Exception
 import Control.Monad
+import Data.Default
 import Data.List as L
 import Data.Maybe
-import Data.Monoid
 import Data.Time
 import Data.Time.Clock.POSIX
 import Network.URI
@@ -60,16 +60,15 @@ filterNew feedList feeds = do
     print $ green $ "Showed from:" <+> text (formatPubDate localTime)
   return userFeeds
 
-
 previewFeed :: URI -> IO ()
-previewFeed = getRSS >=> setCurrentZone >=> renderRSS True
+previewFeed = getRSS >=> setCurrentZone >=> renderRSS def . return
 
 showBatch :: Style -> FilePath -> [URI] -> IO ()
-showBatch Style {..} feedList uris = do
+showBatch style @ Style {..} feedList uris = do
   (broken, feeds) <- fetchFeeds uris
   putBroken broken
   userFeed <- if newOnly then filterNew feedList feeds else return feeds
-  renderRSS feedDesc . mconcat =<< setCurrentZone userFeed
+  renderRSS style =<< setCurrentZone userFeed
 
 streamFeeds :: [URI] -> IO ()
 streamFeeds = error "not implemented"
