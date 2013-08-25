@@ -12,17 +12,16 @@ module UReader.RSS
 import Control.Applicative
 import Control.Concurrent.ParallelIO
 import Control.Exception
-import Data.ByteString as BS
 import Data.Either
 import Data.List as L
 import Data.Text.Encoding as T
 import Network.URI
-import Network.HTTP
+import Network.Curl.Download
 import Text.RSS.Syntax
 import Text.RSS.Import
 import Text.XML.Light.Input
 
-
+-- TODO filter by time = drop . find
 filterItems :: (RSSItem -> Bool) -> RSS -> RSS
 filterItems p rss = rss
     { rssChannel = let ch = rssChannel rss
@@ -38,13 +37,13 @@ reverseItems rss = rss
 emptyFeed :: RSS -> Bool
 emptyFeed = L.null . rssItems . rssChannel
 
+-- TODO openAsFeed
 getRSS :: URI -> IO RSS
 getRSS uri = do
-  resp <- simpleHTTP $ Request uri GET [] ("" :: ByteString)
-  body <- getResponseBody resp
+  body <- either (throwIO . userError) return =<< openURI (show uri)
   xml  <- maybe (throwIO $ userError "invalid XML") return $
             parseXMLDoc (T.decodeUtf8 body)
-  rss  <- maybe (throwIO $ userError "invalid RSS") return $
+  rss  <- maybe  (throwIO $ userError "invalid RSS") return $
             elementToRSS xml
   return rss
 

@@ -6,8 +6,9 @@
 * DONE pretty renderer
 * DONE --desc
 * DONE order: --new-first, --old-first
-* TODO show comments, e.g.: http://www.gorillavsbear.net/category/mp3/feed/
-* TODO https
+* DONE show comments, e.g.: http://www.gorillavsbear.net/category/mp3/feed/
+* DONE https
+* TODO atom
 * TODO show images
 * TODO add command, e.g.: ureader add $GROUP $URI
 * TODO cache
