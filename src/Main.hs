@@ -1,6 +1,7 @@
 module Main (main) where
 
 import Control.Applicative as A
+import Control.Concurrent
 import Control.Exception
 import Control.Monad
 import Data.Default
@@ -73,14 +74,37 @@ showBatch style @ Style {..} feedList uris = do
   userFeed <- if newOnly then filterNew feedList feeds else return feeds
   renderRSS style =<< setCurrentZone userFeed
 
-streamFeeds :: [URI] -> IO ()
-streamFeeds = error "not implemented"
+pollInterval :: Int
+pollInterval = 1000000 * 10
+
+streamStyle :: Style
+streamStyle = Style
+    { feedOrder = OldFirst
+    , feedDesc  = False
+    , feedMerge = True
+    , newOnly   = True
+    }
+
+streamFeeds :: FilePath -> [URI] -> IO ()
+streamFeeds feedList uris = do
+  forever $ do
+    print "fetch"
+    (_, feeds) <- fetchFeeds uris
+
+
+    print "render"
+    userFeed <- filterNew feedList feeds
+    print userFeed
+    renderRSS streamStyle =<< setCurrentZone userFeed
+
+    print "delay"
+    threadDelay pollInterval
 
 run :: Options -> IO ()
 run Add     {..} = appendFile feedList $ show feedURI ++ "\n"
 run Batch   {..} = getFeedList feedList >>= showBatch feedStyle feedList
 run Preview {..} = previewFeed feedURI
-run Stream  {..} = getFeedList feedList >>= streamFeeds
+run Stream  {..} = getFeedList feedList >>= streamFeeds feedList
 run Version      = putStrLn $ "ureader version " ++ showVersion version
 
 main :: IO ()
