@@ -29,7 +29,7 @@ styleParser = Style
     <*> switch
       ( long    "description"
      <> short   'd'
-     <> help    "Show auxilary info like rss version and channel title"
+     <> help    "Include auxilary info like rss version and channel title"
       )
     <*> switch
       ( long    "merge"
@@ -90,7 +90,7 @@ feedParser = Batch <$> feedListParser <*> styleParser
 feedInfo :: Implicit_ String => ParserInfo Options
 feedInfo = info (helper <*> feedParser) modifier
   where
-    modifier = progDesc "Show feed"
+    modifier = progDesc "Show all feeds specified in feed list"
 
 previewParser :: Parser Options
 previewParser = Preview <$> feedLinkParser
@@ -98,7 +98,7 @@ previewParser = Preview <$> feedLinkParser
 previewInfo :: ParserInfo Options
 previewInfo = info (helper <*> previewParser) modifier
   where
-    modifier = progDesc "Show feed at specified URI"
+    modifier = progDesc "Show feed specified by URI or file path"
 
 versionParser :: Parser Options
 versionParser = flag' Version
@@ -119,7 +119,10 @@ optionsParser = subparser $ mconcat
 optionsInfo :: Implicit_ String => ParserInfo Options
 optionsInfo = info (helper <*> (versionParser <|> optionsParser)) modifier
   where
-    modifier = fullDesc <> progDesc "" <> header ""
+    modifier = fullDesc <> header hdr <> progDesc desc
+    hdr  = "ureader is minimalistic CLI RSS reader"
+    desc =
+       "$ ureader COMMAND --help # for info about particular command"
 
 getDefaultFeeds :: IO FilePath
 getDefaultFeeds = do

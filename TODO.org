@@ -13,9 +13,11 @@
 * DONE add command, e.g.: ureader add $GROUP $URI
 * DONE --version flag
 * DONE parse nested html tags properly
-* TODO more help
-* TODO 0.1.0.0 ?
+* DONE more help
+* TODO index command
 * TODO stream command
+* TODO show from file
+* TODO 0.1.0.0 ?
 * TODO atom
 * TODO cache
 * TODO test rendering (many feeds, say 30-100)
