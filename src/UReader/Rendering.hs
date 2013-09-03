@@ -148,6 +148,25 @@ instance Pretty Attr where
 extDesc :: String -> [Tag String]
 extDesc = canonicalizeTags . parseTags
 
+{- NOTE: the findCloseTag could lead to serious performance
+degradation, but this is very unlikely for HTML embedded in RSS. -}
+
+findCloseTag :: Eq a => a -> [Tag a] -> ([Tag a], [Tag a])
+findCloseTag t = go (0 :: Int) []
+  where
+    go _ acc []       = (acc, [])
+    go n acc (x : xs) =
+      case x of
+        TagOpen  t' _
+          | t == t'   -> go (succ n) (acc ++ [x]) xs
+          | otherwise -> go n (acc ++ [x]) xs
+        TagClose t'
+          | t == t'   -> if n == 0
+                         then (acc, xs)
+                         else go (pred n) (acc ++ [x]) xs
+          | otherwise -> go n (acc ++ [x]) xs
+        _             -> go n (acc ++ [x]) xs
+
 prettySoup :: Bool -> [Tag String] -> Doc
 prettySoup _   []       = mempty
 prettySoup raw (x : xs) = case x of
@@ -176,9 +195,9 @@ prettySoup raw (x : xs) = case x of
         , "img"  --> \desc -> blue desc </> pretty (L.lookup "src" attrs)
         , "pre"  ~-> \body -> linebreak <> align body <> linebreak
 
-        , "h1" --> heading
-        , "h2" --> heading
-        , "h3" --> heading
+        , "h1" --> heading -- TODO heading UPPER
+        , "h2" --> heading -- TODO heading UPPER
+        , "h3" --> heading -- TODO heading UPPER
         , "h4" --> heading
         , "h5" --> heading
         , "h6" --> heading
@@ -202,9 +221,9 @@ prettySoup raw (x : xs) = case x of
           def_attrs = hcat $ punctuate space $ L.map pattr attrs
             where pattr (n, v) = text n <> "=" <> text v
 
-      closeTag m = m a <> prettySoup raw (L.drop 1 b)
+      closeTag m = m a <> prettySoup raw b
         where
-          (a, b) = L.break (== TagClose t) xs
+          (a, b) = findCloseTag t xs
 
   TagClose t -> red ("</" <> text t <> ">") <+> prettySoup raw xs
   t          -> text (show t) <> prettySoup raw xs
