@@ -118,14 +118,14 @@ instance Pretty RSSItem where
   pretty RSSItem {..} =
     (bold (magenta (pretty rssItemTitle)) </> pretty rssItemLink) <$$>
      red  (hsep $ L.map ppCategory rssItemCategories) <$$>
-     indent 2 (maybe mempty
-               (nest 2 . prettySoup False . extDesc) rssItemDescription) <$$>
+       indent 2 (maybe mempty ppItemDesc rssItemDescription) <$$>
     (maybe mempty ppComments rssItemComments) <$$>
     (green (pretty rssItemGuid))            <$$>
     (yellow (pretty rssItemPubDate) </>
       maybe mempty ppAuthor rssItemAuthor)
 
     where
+      ppItemDesc          = nest 2 . prettySoup False False . extDesc
       ppComments comments = "Comments: "  <+> pretty comments
       ppAuthor   author   = "posted by"   <+> red (pretty author)
       ppCategory category = dullblack "*"  <> pretty category
@@ -167,12 +167,16 @@ findCloseTag t = go (0 :: Int) []
           | otherwise -> go n (acc ++ [x]) xs
         _             -> go n (acc ++ [x]) xs
 
-prettySoup :: Bool -> [Tag String] -> Doc
-prettySoup _   []       = mempty
-prettySoup raw (x : xs) = case x of
-  TagText t -> f t <> prettySoup raw xs
+prettySoup :: Bool -> Bool -> [Tag String] -> Doc
+prettySoup _     _   []       = mempty
+prettySoup upper raw (x : xs) = case x of
+  TagText t -> text (upperize (canonicalize t))
+            <> prettySoup upper raw xs
     where
-      f = if raw then text else text . L.filter isPrint
+      canonicalize |    raw    = id
+                   | otherwise = L.filter isPrint
+      upperize     |   upper   = L.map toUpper
+                   | otherwise = id
 
   TagOpen t attrs -> maybe err closeTag $ L.lookup t rules
     where
@@ -195,9 +199,9 @@ prettySoup raw (x : xs) = case x of
         , "img"  --> \desc -> blue desc </> pretty (L.lookup "src" attrs)
         , "pre"  ~-> \body -> linebreak <> align body <> linebreak
 
-        , "h1" --> heading -- TODO heading UPPER
-        , "h2" --> heading -- TODO heading UPPER
-        , "h3" --> heading -- TODO heading UPPER
+        , "h1" ==> heading
+        , "h2" --> heading
+        , "h3" --> heading
         , "h4" --> heading
         , "h5" --> heading
         , "h6" --> heading
@@ -211,19 +215,21 @@ prettySoup raw (x : xs) = case x of
         , "td"    --> fill 40
         ]
         where
-          a --> f = (a, f . prettySoup False)
-          a ~-> f = (a, f . prettySoup True)
+          a --> f = (a, f . prettySoup False False)
+          a ~-> f = (a, f . prettySoup False True)
+          a ==> f = (a, f . prettySoup True  False)
 
           heading body = linebreak <> bold (underline body) <> linebreak
 
-      err = red ("<" <> text t <+> def_attrs <> ">") <+> prettySoup raw xs
+      err = red ("<" <> text t <+> def_attrs <> ">")
+        <+> prettySoup upper raw xs
         where
           def_attrs = hcat $ punctuate space $ L.map pattr attrs
             where pattr (n, v) = text n <> "=" <> text v
 
-      closeTag m = m a <> prettySoup raw b
+      closeTag m = m a <> prettySoup upper raw b
         where
           (a, b) = findCloseTag t xs
 
-  TagClose t -> red ("</" <> text t <> ">") <+> prettySoup raw xs
-  t          -> text (show t) <> prettySoup raw xs
+  TagClose t -> red ("</" <> text t <> ">") <+> prettySoup upper raw xs
+  t          -> text (show t) <> prettySoup upper raw xs
