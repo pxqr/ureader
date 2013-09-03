@@ -161,6 +161,7 @@ prettySoup raw (x : xs) = case x of
         [ "p"  --> \par -> linebreak <> par <> linebreak
         , "i"  --> underline
         , "em" --> underline
+        , "u"  --> underline
         , "strong" --> bold
         , "b"  --> bold
         , "tt" --> dullwhite
