@@ -12,8 +12,10 @@
 * WONT show images
 * DONE add command, e.g.: ureader add $GROUP $URI
 * DONE --version flag
+* TODO parse nested html tags properly
+* TODO more help
+* TODO 0.1.0.0 ?
 * TODO stream command
 * TODO atom
 * TODO cache
-* TODO parse nested html tags properly
 * TODO test rendering (many feeds, say 30-100)

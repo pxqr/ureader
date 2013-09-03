@@ -117,16 +117,18 @@ instance Pretty RSSChannel where
 instance Pretty RSSItem where
   pretty RSSItem {..} =
     (bold (magenta (pretty rssItemTitle)) </> pretty rssItemLink) <$$>
-    red   (hsep $ L.map ppCategory rssItemCategories) <$$>
+     red  (hsep $ L.map ppCategory rssItemCategories) <$$>
      indent 2 (maybe mempty
                (nest 2 . prettySoup False . extDesc) rssItemDescription) <$$>
-    (dullblack "Comments: " <+> (pretty rssItemComments)) <$$>
+    (maybe mempty ppComments rssItemComments) <$$>
     (green (pretty rssItemGuid))            <$$>
     (yellow (pretty rssItemPubDate) </>
-      "posted by" <+> red (pretty rssItemAuthor))
+      maybe mempty ppAuthor rssItemAuthor)
 
     where
-      ppCategory x = dullblack "*" <> pretty x
+      ppComments comments = "Comments: "  <+> pretty comments
+      ppAuthor   author   = "posted by"   <+> red (pretty author)
+      ppCategory category = dullblack "*"  <> pretty category
 
 
 instance Pretty RSSGuid where
