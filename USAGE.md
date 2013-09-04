@@ -20,9 +20,8 @@ The `add` command is the same as `$ echo $URI >> feed.list`.
 
 After you added sufficient amount of links using the `view` and `add`
 commands you have a choice - you can view feed using either _batch_
-mode or _stream_ mode.
-
-To show your feed in _batch_ mode use the `feed` command:
+mode or _stream_ mode. To show your feed in _batch_ mode use the
+`feed` command:
 
 ```bash
 $ ureader feed | $PAGER
@@ -35,9 +34,7 @@ where $PAGER could be:
 * most(1) — some colors, clutterring again.
 
 The `feed` have some formatting options, use `ureader feed --help` to
-get help about command.
-
-The stream mode enabled by _stream_ command:
+get help about command. The stream mode enabled by _stream_ command:
 
 ```bash
 $ ureader stream
@@ -84,7 +81,7 @@ $ ureader view file://localhost/var/cohen.rss     # show feed from a file
 You could also add the file URI to your feed list just like any other
 URI:
 
-```
+```bash
 $ ureader add file://localhost/var/cohen.rss
 ```
 
