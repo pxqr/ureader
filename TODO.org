@@ -14,10 +14,12 @@
 * DONE --version flag
 * DONE parse nested html tags properly
 * DONE more help
-* TODO index command
+* DONE show from file
+* TODO uri deduplication
 * TODO stream command
-* TODO show from file
 * TODO 0.1.0.0 ?
+* TODO index command
+* TODO stream command: event notifications
 * TODO atom
 * TODO cache
 * TODO test rendering (many feeds, say 30-100)

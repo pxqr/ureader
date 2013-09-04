@@ -3,7 +3,8 @@
 `ureader` is minimalistic command line RSS reader with unicode and
 color support. Everything it does is fetch RSS documents, merge them
 according to specified options, format and flush resulting feed to
-stdout.
+stdout. So `ureader` could be used with pagers like `more(1)` or in
+linux terminal.
 
 UReader aims to be:
 
