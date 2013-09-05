@@ -2,6 +2,7 @@ module Main (main) where
 
 import Control.Applicative as A
 import Control.Concurrent
+import Control.Concurrent.Async
 import Control.Exception
 import Control.Monad
 import Data.Default
@@ -87,11 +88,19 @@ streamStyle = Style
     , newOnly   = True
     }
 
+updateStream :: FilePath -> [URI] -> IO ()
+updateStream feedList uris
+  = filterNew feedList uris >>= setCurrentZone >>= renderRSS streamStyle
+
+pollBy :: Int -> IO () -> IO ()
+pollBy interval action = forever $ do
+  end <- async $ action
+  threadDelay $ interval * 1000000
+  wait end
+
 streamFeeds :: FilePath -> Int -> [URI] -> IO ()
-streamFeeds feedList interval uris = forever $ do
-    userFeed <- filterNew feedList uris
-    renderRSS streamStyle =<< setCurrentZone userFeed
-    threadDelay $ interval * 1000000
+streamFeeds feedList interval uris =
+  pollBy interval $ do updateStream feedList uris
 
 run :: Options -> IO ()
 run Add     {..} = appendFile feedList $ show feedURI ++ "\n"

@@ -16,9 +16,9 @@
 * DONE more help
 * DONE show from file
 * DONE use HEAD method to poll resource updates
-* TODO stream command
+* DONE stream command
 ** DONE --interval
-** TODO more precise timing
+** DONE more precise timing
 * WONT uri deduplication (reason: OPML)
 * TODO 0.1.0.0 ?
 * TODO OPML  instead of feed lists

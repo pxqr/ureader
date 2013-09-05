@@ -39,6 +39,7 @@ executable ureader
                      , implicit-params == 0.2.*
                      , data-default
 
+                     , async
                      , parallel-io == 0.3.*
 
                      , bytestring == 0.10.*
