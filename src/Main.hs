@@ -94,9 +94,12 @@ updateStream feedList uris
 
 pollBy :: Int -> IO () -> IO ()
 pollBy interval action = forever $ do
-  end <- async $ action
-  threadDelay $ interval * 1000000
-  wait end
+    end <- async $ handle handler action
+    threadDelay $ interval * 1000000
+    wait end
+  where
+    handler :: SomeException -> IO ()
+    handler = print
 
 streamFeeds :: FilePath -> Int -> [URI] -> IO ()
 streamFeeds feedList interval uris =
