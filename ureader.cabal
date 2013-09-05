@@ -71,6 +71,7 @@ executable ureader
                      , optparse-applicative == 0.5.*
                      , terminal-size        == 0.2.*
 
+                     , opml    == 0.4.*
                      , xml     == 1.3.*
                      , feed    == 0.3.*
                      , tagsoup == 0.12.*

@@ -22,6 +22,7 @@
 * WONT uri deduplication (reason: OPML)
 * DONE 0.1.0.0
 * TODO OPML  instead of feed lists
+* TODO logger
 * TODO use units package for time quantities
 * TODO index command
 * TODO stream command: event notifications

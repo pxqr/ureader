@@ -1,5 +1,7 @@
 module Main (main) where
 
+import Prelude as P
+
 import Control.Applicative as A
 import Control.Concurrent
 import Control.Concurrent.Async
@@ -8,10 +10,12 @@ import Control.Monad
 import Data.Default
 import Data.List as L
 import Data.Maybe
+import Data.Monoid
 import Data.Time
 import Data.Time.Clock.POSIX
 import Data.Version (showVersion)
 import Network.URI
+import Text.OPML.Reader
 import Text.PrettyPrint.ANSI.Leijen hiding ((<$>), (<>), (</>), width)
 import Text.RSS.Syntax
 import System.Directory
@@ -30,7 +34,7 @@ parseFeedList :: String -> [URI]
 parseFeedList = mapMaybe parseURI . L.lines
 
 getFeedList :: FilePath -> IO [URI]
-getFeedList feedList = parseFeedList <$> Prelude.readFile feedList
+getFeedList feedList = parseFeedList <$> P.readFile feedList
 
 
 getLastSeen :: FilePath -> IO UTCTime
@@ -38,11 +42,11 @@ getLastSeen lastPath = do
     exist <- doesFileExist lastPath
     if exist
       then do
-        !mLastSeen <- parsePubDate <$> Prelude.readFile lastPath
-        Prelude.writeFile lastPath . formatPubDate =<< getCurrentTime
+        !mLastSeen <- parsePubDate <$> P.readFile lastPath
+        P.writeFile lastPath . formatPubDate =<< getCurrentTime
         return $ fromMaybe epochStart mLastSeen
       else do
-        Prelude.writeFile lastPath . formatPubDate =<< getCurrentTime
+        P.writeFile lastPath . formatPubDate =<< getCurrentTime
         return epochStart
   where
     epochStart = posixSecondsToUTCTime 0
@@ -105,12 +109,20 @@ streamFeeds :: FilePath -> Int -> [URI] -> IO ()
 streamFeeds feedList interval uris =
   pollBy interval $ do updateStream feedList uris
 
+showIndex :: FilePath -> IO ()
+showIndex feedList = do
+  str <- P.readFile feedList
+  case parseOPMLString str of
+    Nothing -> print $ red "unable to parse index file:" <+> text feedList
+    Just ix -> renderFeedList ix
+
 run :: Options -> IO ()
-run Add     {..} = appendFile feedList $ show feedURI ++ "\n"
+run Add     {..} = P.appendFile feedList $ show feedURI ++ "\n"
 run Batch   {..} = getFeedList feedList >>= showBatch feedStyle feedList
+run Index   {..} = showIndex feedList
 run Preview {..} = previewFeed feedURI
 run Stream  {..} = getFeedList feedList >>= streamFeeds feedList feedInterval
-run Version      = putStrLn $ "ureader version " ++ showVersion version
+run Version      = P.putStrLn $ "ureader version " ++ showVersion version
 
 main :: IO ()
 main = getOptions >>= run

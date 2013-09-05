@@ -43,7 +43,7 @@ styleParser = Style
       )
 
 feedListParser :: Implicit_ FilePath => Parser FilePath
-feedListParser = option
+feedListParser = strOption
    ( long    "feeds"
   <> metavar "PATH"
   <> value   param_ <> showDefault
@@ -76,6 +76,7 @@ data Options
    | Stream  { feedList   :: FilePath
              , feedInterval :: Int
              }
+   | Index   { feedList   :: FilePath }
    | Version
      deriving (Show, Eq)
 
@@ -111,6 +112,14 @@ previewInfo = info (helper <*> previewParser) modifier
   where
     modifier = progDesc "Show feed specified by URI or file path"
 
+indexParser :: Implicit_ FilePath => Parser Options
+indexParser = Index <$> feedListParser
+
+indexInfo :: Implicit_ FilePath => ParserInfo Options
+indexInfo = info (helper <*> indexParser) modifier
+  where
+    modifier = progDesc "Show your feed list"
+
 versionParser :: Parser Options
 versionParser = flag' Version
     ( long  "version"
@@ -123,6 +132,7 @@ optionsParser :: Implicit_ String => Parser Options
 optionsParser = subparser $ mconcat
   [ command "add"    addInfo
   , command "feed"   feedInfo
+  , command "index"  indexInfo
   , command "stream" streamInfo
   , command "view"   previewInfo
   ]

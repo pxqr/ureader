@@ -3,6 +3,7 @@ module UReader.Rendering
        ( Order (..)
        , Style (..)
        , renderRSS
+       , renderFeedList
        ) where
 
 import Control.Applicative
@@ -16,6 +17,7 @@ import Data.List as L
 import Data.List.Split as L
 import Data.Set as S
 import Text.HTML.TagSoup
+import Text.OPML.Syntax
 import Text.PrettyPrint.ANSI.Leijen hiding ((<$>), (<>), width)
 import Text.RSS.Syntax
 import Text.XML.Light.Types
@@ -25,6 +27,9 @@ import System.Console.Terminal.Size as Terminal
 import UReader.RSS
 import UReader.Localization
 
+
+renderFeedList :: OPML -> IO ()
+renderFeedList = error "renderFeedList: not implemented"
 
 data Order = NewFirst
            | OldFirst
