@@ -1,5 +1,5 @@
 name:                ureader
-version:             0.0.0.0
+version:             0.1.0.0
 license:             BSD3
 license-file:        LICENSE
 author:              Sam T.
@@ -12,7 +12,18 @@ tested-with:         GHC == 7.6.3
 homepage:            https://github.com/pxqr/ureader
 bug-reports:         https://github.com/pxqr/ureader/issues
 synopsis:            Minimalistic CLI RSS reader.
--- description:
+description:
+
+        `ureader` is minimalistic command line RSS reader with unicode
+        and color support. Everything it does is fetch RSS documents,
+        merge them according to specified options, format and flush
+        resulting feed to stdout. So `ureader` could be used with
+        pagers like `more(1)` or in linux terminal.
+        .
+        [/Release Notes/]
+        .
+          * /0.1.0.0:/ Initial version.
+
 
 source-repository head
   type:                git

@@ -20,7 +20,7 @@
 ** DONE --interval
 ** DONE more precise timing
 * WONT uri deduplication (reason: OPML)
-* TODO 0.1.0.0 ?
+* DONE 0.1.0.0
 * TODO OPML  instead of feed lists
 * TODO use units package for time quantities
 * TODO index command
