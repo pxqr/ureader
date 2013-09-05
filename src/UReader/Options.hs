@@ -56,6 +56,15 @@ feedLinkParser = argument parseURI
   <> help    "URI to feed"
    )
 
+intervalTime :: Parser Int
+intervalTime = option
+   ( long    "interval"
+  <> short   'i'
+  <> metavar "SECONDS"
+  <> value   600 <> showDefault
+  <> help    "Minimal interval between feed updates"
+   )
+
 data Options
    = Add     { feedList   :: FilePath
              , feedURI    :: URI
@@ -64,7 +73,9 @@ data Options
              , feedStyle  :: Style
              }
    | Preview { feedURI    :: URI  }
-   | Stream  { feedList   :: FilePath }
+   | Stream  { feedList   :: FilePath
+             , feedInterval :: Int
+             }
    | Version
      deriving (Show, Eq)
 
@@ -77,7 +88,7 @@ addInfo = info (helper <*> addParser) modifier
     modifier = progDesc "Add a feed to the feed list"
 
 streamParser :: Implicit_ String => Parser Options
-streamParser = Stream <$> feedListParser
+streamParser = Stream <$> feedListParser <*> intervalTime
 
 streamInfo :: Implicit_ String => ParserInfo Options
 streamInfo = info (helper <*> streamParser) modifier

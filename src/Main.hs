@@ -79,9 +79,6 @@ showBatch style @ Style {..} feedList uris = do
   renderRSS style =<< setCurrentZone =<<
     (if newOnly then filterNew feedList else fetch Nothing) uris
 
-pollInterval :: Int
-pollInterval = 1000000 * 10
-
 streamStyle :: Style
 streamStyle = Style
     { feedOrder = OldFirst
@@ -90,18 +87,17 @@ streamStyle = Style
     , newOnly   = True
     }
 
-streamFeeds :: FilePath -> [URI] -> IO ()
-streamFeeds feedList uris = do
-  forever $ do
+streamFeeds :: FilePath -> Int -> [URI] -> IO ()
+streamFeeds feedList interval uris = forever $ do
     userFeed <- filterNew feedList uris
     renderRSS streamStyle =<< setCurrentZone userFeed
-    threadDelay pollInterval
+    threadDelay $ interval * 1000000
 
 run :: Options -> IO ()
 run Add     {..} = appendFile feedList $ show feedURI ++ "\n"
 run Batch   {..} = getFeedList feedList >>= showBatch feedStyle feedList
 run Preview {..} = previewFeed feedURI
-run Stream  {..} = getFeedList feedList >>= streamFeeds feedList
+run Stream  {..} = getFeedList feedList >>= streamFeeds feedList feedInterval
 run Version      = putStrLn $ "ureader version " ++ showVersion version
 
 main :: IO ()
