@@ -25,7 +25,7 @@ The sample produced by `$ ureader feed --unread | more`:
 
 For help see `$ ureader --help` and `$ ureader COMMAND --help`.
 
-For usage see [USAGE][USAGE.md] document.
+For usage see [USAGE](USAGE.md) document.
 
 ### Install
 
