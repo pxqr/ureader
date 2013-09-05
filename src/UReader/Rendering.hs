@@ -154,18 +154,18 @@ degradation, but this is very unlikely for HTML embedded in RSS. -}
 findCloseTag :: Eq a => a -> [Tag a] -> ([Tag a], [Tag a])
 findCloseTag t = go (0 :: Int) []
   where
-    go _ acc []       = (acc, [])
+    go _ acc []       = (reverse acc, [])
     go n acc (x : xs) =
       case x of
         TagOpen  t' _
-          | t == t'   -> go (succ n) (acc ++ [x]) xs
-          | otherwise -> go n (acc ++ [x]) xs
+          | t == t'   -> go (succ n) (x : acc) xs
+          | otherwise -> go       n  (x : acc) xs
         TagClose t'
           | t == t'   -> if n == 0
-                         then (acc, xs)
-                         else go (pred n) (acc ++ [x]) xs
-          | otherwise -> go n (acc ++ [x]) xs
-        _             -> go n (acc ++ [x]) xs
+                    then (reverse acc, xs)
+                    else go (pred n) (x : acc) xs
+          | otherwise -> go       n  (x : acc) xs
+        _             -> go       n  (x : acc) xs
 
 prettySoup :: Bool -> Bool -> [Tag String] -> Doc
 prettySoup _     _   []       = mempty
