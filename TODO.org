@@ -15,8 +15,9 @@
 * DONE parse nested html tags properly
 * DONE more help
 * DONE show from file
-* TODO uri deduplication
+* DONE use HEAD method to poll resource updates
 * TODO stream command
+* TODO uri deduplication
 * TODO 0.1.0.0 ?
 * TODO index command
 * TODO stream command: event notifications

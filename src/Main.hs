@@ -54,13 +54,20 @@ putBroken broken = do
 timestampExt :: FilePath
 timestampExt = "lastseen"
 
-filterNew :: FilePath -> [RSS] -> IO [RSS]
-filterNew feedList feeds = do
+fetch :: Maybe UTCTime -> [URI] -> IO [RSS]
+fetch t uris = do
+  (broken, feeds) <- fetchFeeds t uris
+  putBroken broken
+  return feeds
+
+filterNew :: FilePath -> [URI] -> IO [RSS]
+filterNew feedList uris = do
   lastSeen  <- getLastSeen (feedList <.> timestampExt)
-  localTime <- utcToLocalTime <$> getCurrentTimeZone <*> pure lastSeen
+  feeds     <- fetch (Just lastSeen) uris
   let isNew item = pubDate item > Just lastSeen
   let userFeeds  =  L.map (filterItems isNew) feeds
-  unless (L.all emptyFeed userFeeds) $
+  unless (L.all emptyFeed userFeeds) $ do
+    localTime <- utcToLocalTime <$> getCurrentTimeZone <*> pure lastSeen
     print $ green $ "Showed from:" <+> text (formatPubDate localTime)
   return userFeeds
 
@@ -69,10 +76,9 @@ previewFeed = getRSS >=> setCurrentZone >=> renderRSS def . return
 
 showBatch :: Style -> FilePath -> [URI] -> IO ()
 showBatch style @ Style {..} feedList uris = do
-  (broken, feeds) <- fetchFeeds uris
-  putBroken broken
-  userFeed <- if newOnly then filterNew feedList feeds else return feeds
-  renderRSS style =<< setCurrentZone userFeed
+  renderRSS style =<< setCurrentZone =<<
+    (if newOnly then filterNew feedList else fetch Nothing) uris
+
 
 pollInterval :: Int
 pollInterval = 1000000 * 10
@@ -88,16 +94,8 @@ streamStyle = Style
 streamFeeds :: FilePath -> [URI] -> IO ()
 streamFeeds feedList uris = do
   forever $ do
-    print "fetch"
-    (_, feeds) <- fetchFeeds uris
-
-
-    print "render"
-    userFeed <- filterNew feedList feeds
-    print userFeed
+    userFeed <- filterNew feedList uris
     renderRSS streamStyle =<< setCurrentZone userFeed
-
-    print "delay"
     threadDelay pollInterval
 
 run :: Options -> IO ()

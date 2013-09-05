@@ -50,6 +50,7 @@ executable ureader
                      , old-locale == 1.0.*
 
                      , network == 2.4.*
+                     , curl
                      , download-curl
 
                      , directory == 1.2.*
