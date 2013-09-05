@@ -60,15 +60,15 @@ formatOrder :: Order -> RSS -> RSS
 formatOrder NewFirst = id
 formatOrder OldFirst = reverseItems
 
-formatFeeds :: Style -> [RSS] -> [Doc]
+formatFeeds :: Style -> [RSS] -> Doc
 formatFeeds Style {..}
-  = L.map (prettyDesc feedDesc . formatOrder feedOrder) . merge feedMerge
+  = vsep . punctuate linebreak
+  . L.map (prettyDesc feedDesc . formatOrder feedOrder) . merge feedMerge
 
 renderRSS :: Style -> [RSS] -> IO ()
 renderRSS style feeds = do
   Window {..} <- fromMaybe (Window 80 60) <$> Terminal.size
-  forM_ (formatFeeds style feeds) $
-    displayIO stdout . renderPretty 0.8 width
+  displayIO stdout $ renderPretty 0.8 width $ formatFeeds style feeds
 
 instance Monoid RSS where
   mempty  = nullRSS "" ""
