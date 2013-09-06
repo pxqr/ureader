@@ -73,7 +73,8 @@ filterNew feedList uris = do
   let userFeeds  =  L.map (filterItems isNew) feeds
   unless (L.all emptyFeed userFeeds) $ do
     localTime <- utcToLocalTime <$> getCurrentTimeZone <*> pure lastSeen
-    print $ green $ "Showed from:" <+> text (formatPubDate localTime)
+    print $ green $ newline <>
+      "Showed from:" <+> text (formatPubDate localTime)
   return userFeeds
 
 previewFeed :: URI -> IO ()
