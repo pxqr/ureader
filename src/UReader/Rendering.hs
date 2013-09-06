@@ -21,15 +21,62 @@ import Text.OPML.Syntax
 import Text.PrettyPrint.ANSI.Leijen hiding ((<$>), (<>), width)
 import Text.RSS.Syntax
 import Text.XML.Light.Types
+import Network.URI
 import System.IO
 import System.Console.Terminal.Size as Terminal
 
 import UReader.RSS
 import UReader.Localization
 
+{-----------------------------------------------------------------------
+  Feed list
+-----------------------------------------------------------------------}
 
 renderFeedList :: OPML -> IO ()
-renderFeedList = error "renderFeedList: not implemented"
+renderFeedList = print . pretty
+
+uriQName :: String
+uriQName = "xmlUrl"
+
+lookupAttr :: String -> [Attr] -> Maybe String
+lookupAttr _     [] = Nothing
+lookupAttr qname (Attr {..} : xs)
+  | qName attrKey == qname = Just attrVal
+  |         otherwise      = lookupAttr qname xs
+
+instance Pretty Outline where
+  pretty Outline  {..} =
+    fill 28 (topicTy (pretty opmlText))
+                      <+> ppURI opmlOutlineAttrs <>
+      if L.null opmlOutlineChildren then mempty else linebreak <>
+        indent 4 (vsep $ L.map pretty opmlOutlineChildren)
+--    , "type" <+> pretty opmlType
+--    , "categories" <+> pretty opmlCategories
+--    , "comment"    <+> pretty opmlIsComment
+--    , "breakpoint" <+> pretty opmlIsBreakpoint
+--    , "other"      <+> pretty (show opmlOutlineOther)
+    where
+      topicTy
+        | L.null opmlOutlineChildren = blue    . underline
+        |         otherwise          = magenta . bold
+
+      ppURI (lookupAttr uriQName -> Just uriStr)
+        | Just uri <- parseURI uriStr = "<" <> text (show uri) <> ">"
+        |         otherwise           = red "invalid URL"
+      ppURI _ = mempty
+
+instance Pretty OPMLHead where
+  pretty OPMLHead {..} = pretty opmlTitle
+
+instance Pretty OPML where
+  pretty OPML {..}
+    = --"version" <+> text opmlVersion </>
+      --"head   " <+> pretty opmlHead  </>
+      vsep (L.map pretty opmlBody)
+
+{-----------------------------------------------------------------------
+  Feed
+-----------------------------------------------------------------------}
 
 data Order = NewFirst
            | OldFirst
@@ -143,8 +190,8 @@ instance Pretty RSSGuid where
 
 instance Pretty RSSCategory where
   pretty RSSCategory {..} =
-    dullyellow (maybe mempty text rssCategoryDomain) <>
-    dullred    (hsep $ L.map pretty rssCategoryAttrs)  <>
+    dullyellow (maybe mempty text rssCategoryDomain)  <>
+    dullred    (hsep $ L.map pretty rssCategoryAttrs) <>
     dullblue   (text rssCategoryValue)
 
 instance Pretty Attr where
