@@ -29,15 +29,13 @@ For usage see [USAGE](USAGE.md) document.
 
 ### Install
 
-Recommended way to install the package in Debian is:
+Recommended way to install the package is:
 
-```bash
-$ apt-get install libghc-text-prof libghc-network-prof libghc-http-prof libghc-optparse-applicative-prof libghc-ansi-wl-pprint-prof libghc-xml-prof libghc-feed-prof libghc-tagsoup-prof
-$ cabal install implicit-params parallel-io
-$ git clone git://github.com/pxqr/ureader.git && cd ureader && cabal install
-```
-
-and add `~/.cabal/bin` to the `PATH`, if not already.
+* Optional: Debian and Gentoo users could install dependecies using
+system package manager, though this step is strictly optional. For a
+complete dependencies list see ureader [hackage][hackage] page.
+* `$ cabal install ureader`
+* Optional: add `~/.cabal/bin` to the `PATH`, if not already.
 
 ### Build Status [![Build Status][travis-img]][travis-log]
 
@@ -49,5 +47,6 @@ You can report any issues at [Issue tracker][issues].
 
 [sample]: https://raw.github.com/wiki/pxqr/ureader/sample-output.png
 [issues]: https://github.com/pxqr/ureader/issues
+[hackage]: http://hackage.haskell.org/package/ureader
 [travis-img]: https://travis-ci.org/pxqr/ureader.png
 [travis-log]: https://travis-ci.org/pxqr/ureader
