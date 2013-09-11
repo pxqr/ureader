@@ -31,7 +31,7 @@ For usage see [USAGE](USAGE.md) document.
 
 Recommended way to install the package is:
 
-* Optional: Debian and Gentoo users could install dependecies using
+* Optional: Debian and Gentoo users could install dependencies using
 system package manager, though this step is strictly optional. For a
 complete dependencies list see ureader [hackage][hackage] page.
 * `$ cabal install ureader`
