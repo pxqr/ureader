@@ -22,10 +22,17 @@
 * WONT uri deduplication (reason: OPML)
 * DONE 0.1.0.0
 * TODO OPML  instead of feed lists
-* TODO logger
-* TODO use units package for time quantities
-* TODO index command
-* TODO stream command: event notifications
+** TODO "index" command
+** TODO update the "add" command to use OPML
+** TODO "remove" command
+** TODO update docs
+* TODO 0.2.0.0 (breaking bump: config file format changed)
 * TODO atom
+* TODO 0.2.1.0
+* TODO .deb
+* TODO logger
+* TODO use the units package for time quantities
+* TODO stream command: event notifications
 * TODO cache
+* TODO full HTML4 support (considering ansi-term)
 * TODO test rendering (many feeds, say 30-100)
