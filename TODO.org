@@ -22,13 +22,15 @@
 * WONT uri deduplication (reason: OPML)
 * DONE 0.1.0.0
 * TODO OPML  instead of feed lists
-** TODO "index" command
+** DONE update "stream" and "feed" commands to use OPML
+** DONE "index" command
 ** TODO update the "add" command to use OPML
 ** TODO "remove" command
 ** TODO update docs
 * TODO 0.2.0.0 (breaking bump: config file format changed)
 * TODO atom
 * TODO 0.2.1.0
+* TODO bench
 * TODO .deb
 * TODO logger
 * TODO use the units package for time quantities

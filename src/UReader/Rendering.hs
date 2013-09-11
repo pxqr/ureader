@@ -27,6 +27,7 @@ import System.Console.Terminal.Size as Terminal
 
 import UReader.RSS
 import UReader.Localization
+import UReader.Outline
 
 {-----------------------------------------------------------------------
   Feed list
@@ -34,15 +35,6 @@ import UReader.Localization
 
 renderFeedList :: OPML -> IO ()
 renderFeedList = print . pretty
-
-uriQName :: String
-uriQName = "xmlUrl"
-
-lookupAttr :: String -> [Attr] -> Maybe String
-lookupAttr _     [] = Nothing
-lookupAttr qname (Attr {..} : xs)
-  | qName attrKey == qname = Just attrVal
-  |         otherwise      = lookupAttr qname xs
 
 instance Pretty Outline where
   pretty Outline  {..} =

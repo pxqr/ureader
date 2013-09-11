@@ -26,15 +26,9 @@ import Paths_ureader
 
 import UReader.Localization
 import UReader.Options
+import UReader.Outline
 import UReader.Rendering
 import UReader.RSS
-
-
-parseFeedList :: String -> [URI]
-parseFeedList = mapMaybe parseURI . L.lines
-
-getFeedList :: FilePath -> IO [URI]
-getFeedList feedList = parseFeedList <$> P.readFile feedList
 
 
 getLastSeen :: FilePath -> IO UTCTime
@@ -73,7 +67,7 @@ filterNew feedList uris = do
   let userFeeds  =  L.map (filterItems isNew) feeds
   unless (L.all emptyFeed userFeeds) $ do
     localTime <- utcToLocalTime <$> getCurrentTimeZone <*> pure lastSeen
-    print $ green $ newline <>
+    print $ green $ linebreak <>
       "Showed from:" <+> text (formatPubDate localTime)
   return userFeeds
 
