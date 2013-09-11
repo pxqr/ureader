@@ -1,7 +1,7 @@
 module UReader.Options
        ( Order (..)
        , Style (..)
-
+       , Selector
        , Options (..)
        , getOptions
        ) where
@@ -65,6 +65,14 @@ intervalTime = option
   <> help    "Minimal interval between feed updates"
    )
 
+type Selector = Maybe String
+
+feedGroupParser :: Parser Selector
+feedGroupParser = optional $ argument Just
+   ( metavar "GROUP"
+  <> help    "Feed group used to specify some subset of feeds"
+   )
+
 data Options
    = Add     { feedList   :: FilePath
              , feedURI    :: URI
@@ -76,7 +84,9 @@ data Options
    | Stream  { feedList   :: FilePath
              , feedInterval :: Int
              }
-   | Index   { feedList   :: FilePath }
+   | Index   { feedList   :: FilePath
+             , feedGroup  :: Selector
+             }
    | Version
      deriving (Show, Eq)
 
@@ -113,7 +123,7 @@ previewInfo = info (helper <*> previewParser) modifier
     modifier = progDesc "Show feed specified by URI or file path"
 
 indexParser :: Implicit_ FilePath => Parser Options
-indexParser = Index <$> feedListParser
+indexParser = Index <$> feedListParser <*> feedGroupParser
 
 indexInfo :: Implicit_ FilePath => ParserInfo Options
 indexInfo = info (helper <*> indexParser) modifier

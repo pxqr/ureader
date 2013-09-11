@@ -3,6 +3,7 @@ module UReader.Outline
        , lookupAttr
        , extractURIs
        , getFeedList
+       , lookupGroup
        ) where
 
 import Prelude as P
@@ -10,6 +11,7 @@ import Prelude as P
 import Control.Applicative
 import Control.Exception
 import Control.Monad
+import Data.Char
 import Data.Function
 import Data.Maybe
 import Data.List as L
@@ -42,6 +44,16 @@ getFeedList feedList = do
   case parseOPMLString str of
     Nothing -> throwIO $ userError "unable to parse feed list"
     Just us -> return $ extractURIs us
+
+lookupGroup :: String -> OPML -> Maybe OPML
+lookupGroup gid opml @ OPML {..}
+    | Just grp <- go opmlBody = Just opml { opmlBody = grp }
+    |        otherwise        = Nothing
+  where
+    go [] = Nothing
+    go (Outline {..} : xs)
+      | L.map toLower opmlText == L.map toLower gid = Just opmlOutlineChildren
+      |                     otherwise               = go xs
 
 findModify :: (a -> Bool) -> (a -> a) -> [a] -> Maybe [a]
 findModify p f = go
