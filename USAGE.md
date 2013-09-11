@@ -19,26 +19,31 @@ $ ureader add http://hackage.haskell.org/packages/archive/recent.rss
 The `add` command is the same as `$ echo $URI >> feed.list`.
 
 After you added sufficient amount of links using the `view` and `add`
-commands you have a choice - you can view feed using either _batch_
-mode or _stream_ mode. To show your feed in _batch_ mode use the
-`feed` command:
+commands you have a choice - you can view feed using either _batch_ or
+_stream mode_. To show your feed in _batch mode_ use the `feed`
+command:
 
 ```bash
 $ ureader feed | $PAGER
 ```
 
-where $PAGER could be:
+where the `$PAGER` could be:
 
-* more(1) - colors, underlined and bold text;
-* less(1) — ignore colors, clutter because of ESC characters;
-* most(1) — some colors, clutterring again.
+* [more(1)][more] — colored, underlined and bold text;
+* [less(1)][less] — ignore colors, clutter because of ESC characters;
+* [most(1)][most] — some colors, cluttering again.
 
 The `feed` have some formatting options, use `ureader feed --help` to
-get help about command. The stream mode enabled by _stream_ command:
+get help about command. The _stream mode_ enabled by the `stream`
+command:
 
 ```bash
 $ ureader stream
 ```
+
+[more]: http://linux.die.net/man/1/more
+[less]: http://linux.die.net/man/1/less
+[most]: http://linux.die.net/man/1/most
 
 ### Feed list
 
@@ -96,7 +101,7 @@ $ ureader feed --feeds ~/.ureader/feed/home # home feeds
 $ ureader feed --feeds ~/.ureader/feed/work # work feeds
 ```
 
-To join feeds use `cat(1)`.
+To join feeds use [cat(1)][cat].
 
 ```bash
 $ cat ~/.ureader/feed/* > ~.ureader/feeds
@@ -104,3 +109,5 @@ $ ureader feed # all feeds
 ```
 
 This way you could make any feed hierarhy you want.
+
+[cat]: http://linux.die.net/man/1/cat
