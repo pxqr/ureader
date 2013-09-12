@@ -4,6 +4,7 @@ module UReader.Outline
        , extractURIs
        , getFeedList
        , lookupGroup
+       , Selector
        ) where
 
 import Prelude as P
@@ -12,13 +13,13 @@ import Control.Applicative
 import Control.Exception
 import Control.Monad
 import Data.Char
-import Data.Function
 import Data.Maybe
 import Data.List as L
 import Network.URI
 import Text.OPML.Syntax
 import Text.OPML.Reader
 import Text.XML.Light.Types
+import Text.PrettyPrint.ANSI.Leijen hiding ((<$>), (<>), (</>), width)
 
 
 uriQName :: String
@@ -38,13 +39,6 @@ extractURIs OPML {..} = mapMaybe getURI $ flattenMany opmlBody
 
     getURI = lookupAttr uriQName >=> parseURI
 
-getFeedList :: FilePath -> IO [URI]
-getFeedList feedList = do
-  str <- P.readFile feedList
-  case parseOPMLString str of
-    Nothing -> throwIO $ userError "unable to parse feed list"
-    Just us -> return $ extractURIs us
-
 lookupGroup :: String -> OPML -> Maybe OPML
 lookupGroup gid opml @ OPML {..}
     | Just grp <- go opmlBody = Just opml { opmlBody = grp }
@@ -54,6 +48,31 @@ lookupGroup gid opml @ OPML {..}
     go (Outline {..} : xs)
       | L.map toLower opmlText == L.map toLower gid = Just opmlOutlineChildren
       |                     otherwise               = go xs
+
+type Selector = Maybe String
+
+lookupError :: String -> Doc
+lookupError g = red "there is no " <+> blue (text (show g)) <+> red "group"
+
+lookupGroup' :: Maybe String -> OPML -> IO OPML
+lookupGroup' Nothing  opml = return opml
+lookupGroup' (Just g) opml = case lookupGroup g opml of
+  Nothing -> throwIO $ userError $ show $ lookupError g
+  Just  r -> return r
+
+parseError :: FilePath -> Doc
+parseError path = red "unable to parse index file: " <+> text path
+
+parseOPML :: FilePath -> IO OPML
+parseOPML path = do
+  str <- P.readFile path
+  maybe  (throwIO $ userError $ show $ parseError path) return
+      $ parseOPMLString str
+
+getFeedList :: FilePath -> Maybe String -> IO [URI]
+getFeedList path mgid = do
+  opml <- parseOPML path
+  extractURIs <$> lookupGroup' mgid opml
 
 findModify :: (a -> Bool) -> (a -> a) -> [a] -> Maybe [a]
 findModify p f = go

@@ -104,22 +104,25 @@ streamFeeds :: FilePath -> Int -> [URI] -> IO ()
 streamFeeds feedList interval uris =
   pollBy interval $ do updateStream feedList uris
 
-showIndex :: FilePath -> Selector -> IO ()
-showIndex feedList group = do
+putIndex :: FilePath -> Selector -> IO ()
+putIndex feedList group = do
     str <- P.readFile feedList
-    maybe parseError ppIndex $ parseOPMLString str
+    maybe (print parseError) ppIndex $ parseOPMLString str
   where
-    ppIndex ix  = maybe lookupError renderFeedList $
+    ppIndex ix  = maybe (print lookupError) renderFeedList $
                     maybe Just lookupGroup group ix
-    parseError  = print $ red "unable to parse index file:" <+> text feedList
-    lookupError = print $ red "there is no " <+> text (show group) <+> "group"
+    parseError  = red "unable to parse index file:" <+> text feedList
+    lookupError = red "there is no " <+> blue (text (show group))
+              <+> red "group"
 
 run :: Options -> IO ()
 run Add     {..} = P.appendFile feedList $ show feedURI ++ "\n"
-run Batch   {..} = getFeedList feedList >>= showBatch feedStyle feedList
-run Index   {..} = showIndex feedList feedGroup
-run Preview {..} = previewFeed feedURI
-run Stream  {..} = getFeedList feedList >>= streamFeeds feedList feedInterval
+run Batch   {..} = getFeedList  feedList  feedGroup
+               >>= showBatch    feedStyle feedList
+run Index   {..} = putIndex     feedList  feedGroup
+run Preview {..} = previewFeed  feedURI
+run Stream  {..} = getFeedList  feedList feedGroup
+               >>= streamFeeds  feedList feedInterval
 run Version      = P.putStrLn $ "ureader version " ++ showVersion version
 
 main :: IO ()

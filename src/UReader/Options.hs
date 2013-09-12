@@ -1,7 +1,6 @@
 module UReader.Options
        ( Order (..)
        , Style (..)
-       , Selector
        , Options (..)
        , getOptions
        ) where
@@ -15,6 +14,7 @@ import System.Directory
 import System.FilePath
 
 import UReader.Rendering
+import UReader.Outline
 
 
 styleParser :: Parser Style
@@ -65,8 +65,6 @@ intervalTime = option
   <> help    "Minimal interval between feed updates"
    )
 
-type Selector = Maybe String
-
 feedGroupParser :: Parser Selector
 feedGroupParser = optional $ argument Just
    ( metavar "GROUP"
@@ -79,10 +77,12 @@ data Options
              }
    | Batch   { feedList   :: FilePath
              , feedStyle  :: Style
+             , feedGroup  :: Selector
              }
    | Preview { feedURI    :: URI  }
    | Stream  { feedList   :: FilePath
              , feedInterval :: Int
+             , feedGroup  :: Selector
              }
    | Index   { feedList   :: FilePath
              , feedGroup  :: Selector
@@ -99,7 +99,7 @@ addInfo = info (helper <*> addParser) modifier
     modifier = progDesc "Add a feed to the feed list"
 
 streamParser :: Implicit_ String => Parser Options
-streamParser = Stream <$> feedListParser <*> intervalTime
+streamParser = Stream <$> feedListParser <*> intervalTime <*> feedGroupParser
 
 streamInfo :: Implicit_ String => ParserInfo Options
 streamInfo = info (helper <*> streamParser) modifier
@@ -107,7 +107,7 @@ streamInfo = info (helper <*> streamParser) modifier
     modifier = progDesc "Show feed as never ending stream"
 
 feedParser :: Implicit_ String => Parser Options
-feedParser = Batch <$> feedListParser <*> styleParser
+feedParser = Batch <$> feedListParser <*> styleParser <*> feedGroupParser
 
 feedInfo :: Implicit_ String => ParserInfo Options
 feedInfo = info (helper <*> feedParser) modifier

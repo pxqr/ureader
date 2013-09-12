@@ -24,9 +24,11 @@
 * TODO OPML  instead of feed lists
 ** DONE update "stream" and "feed" commands to use OPML
 ** DONE "index" command
+** DONE groups
 ** TODO update the "add" command to use OPML
 ** TODO "remove" command
 ** TODO update docs
+* TODO add basic modules description
 * TODO 0.2.0.0 (breaking bump: config file format changed)
 * TODO atom
 * TODO 0.2.1.0
