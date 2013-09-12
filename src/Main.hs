@@ -15,7 +15,6 @@ import Data.Time
 import Data.Time.Clock.POSIX
 import Data.Version (showVersion)
 import Network.URI
-import Text.OPML.Reader
 import Text.PrettyPrint.ANSI.Leijen hiding ((<$>), (<>), (</>), width)
 import Text.RSS.Syntax
 import System.Directory
@@ -104,22 +103,12 @@ streamFeeds :: FilePath -> Int -> [URI] -> IO ()
 streamFeeds feedList interval uris =
   pollBy interval $ do updateStream feedList uris
 
-putIndex :: FilePath -> Selector -> IO ()
-putIndex feedList group = do
-    str <- P.readFile feedList
-    maybe (print parseError) ppIndex $ parseOPMLString str
-  where
-    ppIndex ix  = maybe (print lookupError) renderFeedList $
-                    maybe Just lookupGroup group ix
-    parseError  = red "unable to parse index file:" <+> text feedList
-    lookupError = red "there is no " <+> blue (text (show group))
-              <+> red "group"
-
 run :: Options -> IO ()
 run Add     {..} = P.appendFile feedList $ show feedURI ++ "\n"
 run Batch   {..} = getFeedList  feedList  feedGroup
                >>= showBatch    feedStyle feedList
-run Index   {..} = putIndex     feedList  feedGroup
+run Index   {..} = getIndex     feedList  feedGroup
+               >>= renderFeedList
 run Preview {..} = previewFeed  feedURI
 run Stream  {..} = getFeedList  feedList feedGroup
                >>= streamFeeds  feedList feedInterval

@@ -2,9 +2,12 @@ module UReader.Outline
        ( uriQName
        , lookupAttr
        , extractURIs
-       , getFeedList
-       , lookupGroup
+
        , Selector
+       , lookupGroup
+
+       , getFeedList
+       , getIndex
        ) where
 
 import Prelude as P
@@ -61,18 +64,21 @@ lookupGroup' (Just g) opml = case lookupGroup g opml of
   Just  r -> return r
 
 parseError :: FilePath -> Doc
-parseError path = red "unable to parse index file: " <+> text path
+parseError filePath = red "unable to parse index file: " <+> text filePath
 
 parseOPML :: FilePath -> IO OPML
-parseOPML path = do
-  str <- P.readFile path
-  maybe  (throwIO $ userError $ show $ parseError path) return
+parseOPML filePath = do
+  str <- P.readFile filePath
+  maybe  (throwIO $ userError $ show $ parseError filePath) return
       $ parseOPMLString str
 
 getFeedList :: FilePath -> Maybe String -> IO [URI]
-getFeedList path mgid = do
-  opml <- parseOPML path
+getFeedList feedList mgid = do
+  opml <- parseOPML feedList
   extractURIs <$> lookupGroup' mgid opml
+
+getIndex :: FilePath -> Selector -> IO OPML
+getIndex feedList gid = lookupGroup' gid =<< parseOPML feedList
 
 findModify :: (a -> Bool) -> (a -> a) -> [a] -> Maybe [a]
 findModify p f = go
