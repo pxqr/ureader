@@ -26,12 +26,14 @@
 ** DONE "index" command
 ** DONE groups
 ** TODO update the "add" command to use OPML
-** TODO "remove" command
 ** TODO update docs
-* TODO add basic modules description
+* DONE add basic modules description
 * TODO 0.2.0.0 (breaking bump: config file format changed)
-* TODO atom
+* TODO add -> subscribe, remove -> unsubscribe
+* TODO "remove" command
 * TODO 0.2.1.0
+* TODO atom
+* TODO 0.3.0.0
 * TODO bench
 * TODO .deb
 * TODO logger

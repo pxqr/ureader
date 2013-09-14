@@ -1,3 +1,13 @@
+-- |
+--   Copyright   :  (c) Sam Truzjan 2013
+--   License     :  BSD3
+--   Maintainer  :  pxqr.sta@gmail.com
+--   Stability   :  experimental
+--   Portability :  portable
+--
+--   This module provides colored (ansi-terminal compatible) rendering
+--   for OPML, RSS, (Atom not yet) and HTML.
+--
 {-# OPTIONS -fno-warn-orphans #-}
 module UReader.Rendering
        ( Order (..)

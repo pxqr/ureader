@@ -1,3 +1,13 @@
+-- |
+--   Copyright   :  (c) Sam Truzjan 2013
+--   License     :  BSD3
+--   Maintainer  :  pxqr.sta@gmail.com
+--   Stability   :  experimental
+--   Portability :  portable
+--
+--   All stuff relate to command line options should be in this
+--   module: parsers, help, reasonable defaults.
+--
 module UReader.Options
        ( Order (..)
        , Style (..)

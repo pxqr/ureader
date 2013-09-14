@@ -2,9 +2,9 @@ name:                ureader
 version:             0.1.0.0
 license:             BSD3
 license-file:        LICENSE
-author:              Sam T.
-maintainer:          Sam T. <pxqr.sta@gmail.com>
-copyright:           (c) 2013, Sam T.
+author:              Sam Truzjan
+maintainer:          Sam Truzjan <pxqr.sta@gmail.com>
+copyright:           (c) 2013, Sam Truzjan
 category:            RSS
 build-type:          Simple
 cabal-version:       >= 1.10

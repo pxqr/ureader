@@ -1,3 +1,12 @@
+-- |
+--   Copyright   :  (c) Sam Truzjan 2013
+--   License     :  BSD3
+--   Maintainer  :  pxqr.sta@gmail.com
+--   Stability   :  experimental
+--   Portability :  portable
+--
+--   This module provides network related stuff.
+--
 module UReader.RSS
        ( filterItems
        , reverseItems

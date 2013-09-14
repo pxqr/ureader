@@ -1,3 +1,16 @@
+-- |
+--   Copyright   :  (c) Sam Truzjan 2013
+--   License     :  BSD3
+--   Maintainer  :  pxqr.sta@gmail.com
+--   Stability   :  experimental
+--   Portability :  portable
+--
+--   This module provides simple localization for feed items.
+--   Currently an UTC time (pubdate) translated to the LocalTime which
+--   user expect to see.
+--
+--   +0000(UTC) -> +0004(MSK)
+--
 {-# LANGUAGE TypeSynonymInstances #-}
 {-# LANGUAGE OverlappingInstances #-}
 module UReader.Localization

@@ -1,3 +1,13 @@
+-- |
+--   Copyright   :  (c) Sam Truzjan 2013
+--   License     :  BSD3
+--   Maintainer  :  pxqr.sta@gmail.com
+--   Stability   :  experimental
+--   Portability :  portable
+--
+--   This module provide various outline processing bits. Outline is
+--   used to specify subscription list and group existing feeds.
+--
 module UReader.Outline
        ( uriQName
        , lookupAttr
