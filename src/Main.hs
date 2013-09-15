@@ -77,6 +77,7 @@ showBatch :: Style -> FilePath -> [URI] -> IO ()
 showBatch style @ Style {..} feedList uris = do
   renderRSS style =<< setCurrentZone =<<
     (if newOnly then filterNew feedList else fetch Nothing) uris
+  putStrLn ([] :: String)
 
 streamStyle :: Style
 streamStyle = Style
