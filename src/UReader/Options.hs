@@ -81,6 +81,12 @@ feedGroupParser = optional $ argument Just
   <> help    "Feed group used to specify some subset of feeds"
    )
 
+feedParentParser :: Parser String
+feedParentParser = argument Just
+  ( metavar  "GROUP"
+ <> help     ""
+  )
+
 feedTopicParser :: Parser String
 feedTopicParser = argument Just
    ( metavar "TOPIC"
@@ -90,6 +96,7 @@ feedTopicParser = argument Just
 data Options
    = Add     { feedList   :: FilePath
              , feedURI    :: URI
+             , feedParent :: String
              , feedTopic  :: String
              }
    | Batch   { feedList   :: FilePath
@@ -108,7 +115,8 @@ data Options
      deriving (Show, Eq)
 
 addParser :: Implicit_ String => Parser Options
-addParser = Add <$> feedListParser <*> feedLinkParser <*> feedTopicParser
+addParser = Add <$> feedListParser   <*> feedLinkParser
+                <*> feedParentParser <*> feedTopicParser
 
 addInfo :: Implicit_ String => ParserInfo Options
 addInfo = info (helper <*> addParser) modifier

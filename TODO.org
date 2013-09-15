@@ -23,7 +23,7 @@
 * TODO OPML  instead of feed lists
 ** DONE update "stream" and "feed" commands to use OPML
 ** DONE "index" command
-** TODO update the "add" command to use OPML
+** DONE update the "add" command to use OPML
 ** TODO update docs
 * DONE add basic modules description
 * TODO 0.2.0.0 (breaking bump: config file format changed)
