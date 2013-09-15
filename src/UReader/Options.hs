@@ -95,9 +95,9 @@ feedTopicParser = argument Just
 
 data Options
    = Add     { feedList   :: FilePath
-             , feedURI    :: URI
              , feedParent :: String
              , feedTopic  :: String
+             , feedURI    :: URI
              }
    | Batch   { feedList   :: FilePath
              , feedStyle  :: Style
@@ -115,8 +115,9 @@ data Options
      deriving (Show, Eq)
 
 addParser :: Implicit_ String => Parser Options
-addParser = Add <$> feedListParser   <*> feedLinkParser
+addParser = Add <$> feedListParser
                 <*> feedParentParser <*> feedTopicParser
+                <*> feedLinkParser
 
 addInfo :: Implicit_ String => ParserInfo Options
 addInfo = info (helper <*> addParser) modifier
