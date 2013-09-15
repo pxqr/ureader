@@ -84,13 +84,13 @@ feedGroupParser = optional $ argument Just
 feedParentParser :: Parser String
 feedParentParser = argument Just
   ( metavar  "GROUP"
- <> help     ""
+ <> help     "The group feed belongs to"
   )
 
 feedTopicParser :: Parser String
 feedTopicParser = argument Just
    ( metavar "TOPIC"
- <>  help    ""
+ <>  help    "The main feed topic used as feed name"
    )
 
 data Options
