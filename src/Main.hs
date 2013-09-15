@@ -103,14 +103,14 @@ streamFeeds :: FilePath -> Int -> [URI] -> IO ()
 streamFeeds feedList interval uris =
   pollBy interval $ do updateStream feedList uris
 
-addFeed :: FilePath -> URI -> IO ()
-addFeed filePath uri = P.appendFile filePath $ show uri ++ "\n"
+addFeed :: FilePath -> URI -> String -> IO ()
+addFeed filePath uri topic = modifyOPML filePath (insertURI [topic] uri)
 
 putVersion :: IO ()
 putVersion = P.putStrLn $ "ureader version " ++ showVersion version
 
 run :: Options -> IO ()
-run Add     {..} = addFeed      feedList  feedURI
+run Add     {..} = addFeed      feedList  feedURI feedTopic
 run Batch   {..} = getFeedList  feedList  feedGroup
                >>= showBatch    feedStyle feedList
 run Index   {..} = getIndex     feedList  feedGroup

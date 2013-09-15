@@ -14,8 +14,10 @@ module UReader.Outline
        , extractURIs
 
        , Selector
+       , insertURI
        , lookupGroup
 
+       , modifyOPML
        , getFeedList
        , getIndex
        ) where
@@ -25,12 +27,14 @@ import Prelude as P
 import Control.Applicative
 import Control.Exception
 import Control.Monad
+import Control.DeepSeq
 import Data.Char
 import Data.Maybe
 import Data.List as L
 import Network.URI
 import Text.OPML.Syntax
 import Text.OPML.Reader
+import Text.OPML.Writer
 import Text.XML.Light.Types
 import Text.PrettyPrint.ANSI.Leijen hiding ((<$>), (<>), (</>), width)
 
@@ -78,9 +82,21 @@ parseError filePath = red "unable to parse index file: " <+> text filePath
 
 parseOPML :: FilePath -> IO OPML
 parseOPML filePath = do
-  str <- P.readFile filePath
+  !str <- force <$> P.readFile filePath
   maybe  (throwIO $ userError $ show $ parseError filePath) return
       $ parseOPMLString str
+
+writeOPML :: FilePath -> OPML -> IO ()
+writeOPML filePath opml = P.writeFile filePath $ serializeOPML opml
+
+modifyOPML :: FilePath -> (OPML -> OPML) -> IO ()
+modifyOPML filePath modifier = do
+    opml <- parseOPML filePath
+    writeOPML filePath (modifier opml) `onException` restore opml
+  where
+    restore :: OPML -> IO ()
+    restore opml = do
+      writeOPML filePath opml
 
 getFeedList :: FilePath -> Maybe String -> IO [URI]
 getFeedList feedList mgid = do
@@ -89,6 +105,32 @@ getFeedList feedList mgid = do
 
 getIndex :: FilePath -> Selector -> IO OPML
 getIndex feedList gid = lookupGroup' gid =<< parseOPML feedList
+
+nullQName :: String -> QName
+nullQName n = QName n Nothing Nothing
+
+mkEntry :: String -> URI -> Outline
+mkEntry name uri = (nullOutline name)
+  { opmlOutlineAttrs = [Attr (nullQName uriQName) (show uri)]
+  }
+
+mkSingleton :: [String] -> URI -> Outline
+mkSingleton []       _   = error "mkSingleton: empty topic"
+mkSingleton [k]      uri = mkEntry k uri
+mkSingleton (k : ks) uri = (nullOutline k)
+  { opmlOutlineChildren  = [mkSingleton ks uri] }
+
+insertURI :: [String] -> URI -> OPML -> OPML
+insertURI key uri opml @ OPML {..} = opml { opmlBody = go key opmlBody }
+  where
+    go []       _  = error "insertURI: empty topic"
+    go [k]      xs = xs ++ [mkEntry k uri]
+    go (k : ks) xs = fromMaybe def $ findModify check (withChildren (go ks)) xs
+      where
+        withChildren f ol @ Outline {..} = ol
+          { opmlOutlineChildren = f opmlOutlineChildren }
+        check Outline {..} = opmlText == k
+        def = xs ++ [mkSingleton (k : ks) uri]
 
 findModify :: (a -> Bool) -> (a -> a) -> [a] -> Maybe [a]
 findModify p f = go
