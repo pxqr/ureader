@@ -26,7 +26,7 @@
 ** DONE update the "add" command to use OPML
 ** DONE update docs
 * DONE add basic modules description
-* TODO 0.2.0.0 (breaking bump: config file format changed)
+* DONE 0.2.0.0 (breaking bump: config file format changed)
 * TODO "touch" command
 * TODO uri deduplication
 * TODO add -> subscribe, remove -> unsubscribe

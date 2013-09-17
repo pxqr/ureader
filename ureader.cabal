@@ -1,5 +1,5 @@
 name:                ureader
-version:             0.1.0.0
+version:             0.2.0.0
 license:             BSD3
 license-file:        LICENSE
 author:              Sam Truzjan
@@ -18,11 +18,13 @@ description:
         and color support. Everything it does is fetch RSS documents,
         merge them according to specified options, format and flush
         resulting feed to stdout. So `ureader` could be used with
-        pagers like `more(1)` or in linux terminal.
+        pagers like more(1) or in linux terminal.
         .
         [/Release Notes/]
         .
           * /0.1.0.0:/ Initial version.
+        .
+          * /0.2.0.0:/ Use OPML for subscription list.
 
 
 source-repository head
