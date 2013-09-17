@@ -20,11 +20,11 @@
 ** DONE --interval
 ** DONE more precise timing
 * DONE 0.1.0.0
-* TODO OPML  instead of feed lists
+* DONE OPML  instead of feed lists
 ** DONE update "stream" and "feed" commands to use OPML
 ** DONE "index" command
 ** DONE update the "add" command to use OPML
-** TODO update docs
+** DONE update docs
 * DONE add basic modules description
 * TODO 0.2.0.0 (breaking bump: config file format changed)
 * TODO "touch" command
