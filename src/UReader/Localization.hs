@@ -27,8 +27,9 @@ import Control.Monad
 import Data.Implicit
 import Data.Time
 import Text.Atom.Feed   as Atom
-import Text.RSS.Syntax  as RSS2
 import Text.RSS1.Syntax as RSS1
+import Text.RSS.Syntax  as RSS2
+import Text.Feed.Types  as Generic
 import System.Locale
 
 pubDate :: RSSItem -> Maybe UTCTime
@@ -106,3 +107,13 @@ instance LocalZone Atom.Feed where
   localize atom @ Atom.Feed {..}
     = atom { feedUpdated = localize feedUpdated
            , feedEntries = localize feedEntries }
+
+{-----------------------------------------------------------------------
+-- Generic
+-----------------------------------------------------------------------}
+
+instance LocalZone Generic.Feed where
+  localize (AtomFeed f) = AtomFeed (localize f)
+  localize (RSSFeed  f) = RSSFeed  (localize f)
+  localize (RSS1Feed f) = RSS1Feed (localize f)
+  localize (XMLFeed  f) = XMLFeed  f
