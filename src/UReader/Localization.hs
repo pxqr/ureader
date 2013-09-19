@@ -59,6 +59,18 @@ instance LocalZone DateString where
   localize ds = maybe ds (formatPubDate . localizeUTC) $ parsePubDate ds
 
 {-----------------------------------------------------------------------
+-- RSS1
+-----------------------------------------------------------------------}
+
+instance LocalZone RSS1.Channel where
+  localize ch @ RSS1.Channel {..}
+    = ch { channelUpdateBase = localize channelUpdateBase }
+
+instance LocalZone RSS1.Feed where
+  localize rss @ RSS1.Feed {..} =
+    rss { feedChannel = localize feedChannel }
+
+{-----------------------------------------------------------------------
 -- RSS2
 -----------------------------------------------------------------------}
 
