@@ -12,7 +12,7 @@ module UReader.RSS
        , reverseItems
        , emptyFeed
 
-       , getRSS
+       , getFeed
        , fetchFeeds
 
        , resolveComments
@@ -26,42 +26,34 @@ import Data.Char
 import Data.Either
 import Data.List as L
 import Data.Maybe
-import Data.Text.Encoding as T
 import Data.Time
 import Network.URI
 import Network.Curl
 import Network.Curl.Download
-import Text.RSS.Syntax
-import Text.RSS.Import
-import Text.XML.Light.Input
+import Text.Feed.Types as Generic
+import Text.RSS.Syntax as RSS
 import System.Locale
 
 
 -- TODO filter by time = drop . find
-filterItems :: (RSSItem -> Bool) -> RSS -> RSS
-filterItems p rss = rss
+filterItems :: (RSSItem -> Bool) -> Generic.Feed -> Generic.Feed
+filterItems p (RSSFeed rss) = RSSFeed $ rss
     { rssChannel = let ch = rssChannel rss
                    in ch { rssItems = L.filter p (rssItems ch) }
     } -- TODO use lens
 
-reverseItems :: RSS -> RSS
-reverseItems rss = rss
+reverseItems :: Generic.Feed -> Generic.Feed
+reverseItems (RSSFeed rss) = RSSFeed $ rss
   { rssChannel = let ch = rssChannel rss
                  in ch { rssItems = L.reverse (rssItems ch) }
   }
 
-emptyFeed :: RSS -> Bool
-emptyFeed = L.null . rssItems . rssChannel
+emptyFeed :: Generic.Feed -> Bool
+emptyFeed (RSSFeed rss) = L.null . rssItems . rssChannel $ rss
 
 -- TODO openAsFeed
-getRSS :: URI -> IO RSS
-getRSS uri = do
-  body <- either (throwIO . userError) return =<< openURI (show uri)
-  xml  <- maybe (throwIO $ userError "invalid XML") return $
-            parseXMLDoc (T.decodeUtf8 body)
-  rss  <- maybe  (throwIO $ userError "invalid RSS") return $
-            elementToRSS xml
-  return rss
+getFeed :: URI -> IO Feed
+getFeed uri = either (throwIO . userError) return =<< openAsFeed (show uri)
 
 hdrLastModified :: String
 hdrLastModified = "last-modified"
@@ -83,18 +75,18 @@ resourceExpired threshold uri = do
     canonicalize = L.map toLower
 
 
-getRSSFrom :: Maybe UTCTime -> URI -> IO (Maybe RSS)
-getRSSFrom  Nothing uri = Just <$> getRSS uri
-getRSSFrom (Just t) uri = do
+getFeedUpdate :: Maybe UTCTime -> URI -> IO (Maybe Feed)
+getFeedUpdate  Nothing uri = Just <$> getFeed uri
+getFeedUpdate (Just t) uri = do
   updated <- resourceExpired t uri
   if updated
-    then Just <$> getRSS uri
+    then Just <$> getFeed uri
     else return Nothing
 
 fetchFeeds :: Maybe UTCTime -> [URI]
-           -> IO ([(URI, SomeException)], [RSS])
+           -> IO ([(URI, SomeException)], [Feed])
 fetchFeeds mtime urls = do
-    res <- parallelE (L.map (getRSSFrom mtime) urls)
+    res <- parallelE (L.map (getFeedUpdate mtime) urls)
     return $ second catMaybes $ partitionEithers $ urlfy res
   where
     urlfy = L.zipWith (\url -> either (Left .  (,) url) Right) urls

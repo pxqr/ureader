@@ -16,7 +16,7 @@ import Data.Time.Clock.POSIX
 import Data.Version (showVersion)
 import Network.URI
 import Text.PrettyPrint.ANSI.Leijen hiding ((<$>), (<>), (</>), width)
-import Text.RSS.Syntax
+import Text.Feed.Types as Generic
 import System.Directory
 import System.FilePath ((<.>))
 import System.IO
@@ -52,13 +52,13 @@ putBroken broken = do
 timestampExt :: FilePath
 timestampExt = "lastseen"
 
-fetch :: Maybe UTCTime -> [URI] -> IO [RSS]
+fetch :: Maybe UTCTime -> [URI] -> IO [Feed]
 fetch t uris = do
   (broken, feeds) <- fetchFeeds t uris
   putBroken broken
   return feeds
 
-filterNew :: FilePath -> [URI] -> IO [RSS]
+filterNew :: FilePath -> [URI] -> IO [Feed]
 filterNew feedList uris = do
   lastSeen  <- getLastSeen (feedList <.> timestampExt)
   feeds     <- fetch (Just lastSeen) uris
@@ -71,11 +71,11 @@ filterNew feedList uris = do
   return userFeeds
 
 previewFeed :: URI -> IO ()
-previewFeed = getRSS >=> setCurrentZone >=> renderRSS def . return
+previewFeed = getFeed >=> setCurrentZone >=> renderFeed def . return
 
 showBatch :: Style -> FilePath -> [URI] -> IO ()
 showBatch style @ Style {..} feedList uris = do
-  renderRSS style =<< setCurrentZone =<<
+  renderFeed style =<< setCurrentZone =<<
     (if newOnly then filterNew feedList else fetch Nothing) uris
   putStrLn ([] :: String)
 
@@ -89,7 +89,7 @@ streamStyle = Style
 
 updateStream :: FilePath -> [URI] -> IO ()
 updateStream feedList uris
-  = filterNew feedList uris >>= setCurrentZone >>= renderRSS streamStyle
+  = filterNew feedList uris >>= setCurrentZone >>= renderFeed streamStyle
 
 pollBy :: Int -> IO () -> IO ()
 pollBy interval action = forever $ do

@@ -12,7 +12,7 @@
 module UReader.Rendering
        ( Order (..)
        , Style (..)
-       , renderRSS
+       , renderFeed
        , renderFeedList
        ) where
 
@@ -101,28 +101,27 @@ instance Default Style where
     , newOnly   = False
     }
 
-prettyDesc :: Bool -> RSS -> Doc
+prettyDesc :: Bool -> Generic.Feed -> Doc
 prettyDesc keepDesc
-  | keepDesc  = pretty
-  | otherwise
-  = vsep . punctuate linebreak . L.map pretty . rssItems . rssChannel
+    | keepDesc  = pretty
+    | otherwise = vsep . punctuate linebreak . prettyChannel
 
-merge :: Bool -> [RSS] -> [RSS]
+merge :: Bool -> [Generic.Feed] -> [Generic.Feed]
 merge byTime
   |   byTime  = return . mconcat
   | otherwise = id
 
-formatOrder :: Order -> RSS -> RSS
+formatOrder :: Order -> Generic.Feed -> Generic.Feed
 formatOrder NewFirst = id
 formatOrder OldFirst = reverseItems
 
-formatFeeds :: Style -> [RSS] -> Doc
+formatFeeds :: Style -> [Generic.Feed] -> Doc
 formatFeeds Style {..}
   = vsep . punctuate linebreak
   . L.map (prettyDesc feedDesc . formatOrder feedOrder) . merge feedMerge
 
-renderRSS :: Style -> [RSS] -> IO ()
-renderRSS style feeds = do
+renderFeed :: Style -> [Generic.Feed] -> IO ()
+renderFeed style feeds = do
   Window {..} <- fromMaybe (Window 80 60) <$> Terminal.size
   displayIO stdout $ renderPretty 0.8 width $ formatFeeds style feeds
 
@@ -155,6 +154,8 @@ instance Monoid RSSChannel where
       mergeBy f (x : xs) (y : ys)
         |   f x y   = x : mergeBy f xs (y : ys)
         | otherwise = y : mergeBy f (x : xs) ys
+
+instance Monoid Generic.Feed where
 
 {-----------------------------------------------------------------------
 -- RSS2
@@ -227,3 +228,10 @@ instance Pretty Generic.Feed where
   pretty (RSSFeed  r) = pretty r
   pretty (RSS1Feed r) = pretty r
   pretty (XMLFeed  e) = red (text "XML")
+
+-- TODO
+prettyChannel :: Generic.Feed -> [Doc]
+prettyChannel (AtomFeed a) = [pretty a]
+prettyChannel (RSSFeed  r) = L.map pretty . rssItems . rssChannel $ r
+prettyChannel (RSS1Feed r) = [pretty r]
+prettyChannel (XMLFeed  e) = [red (text "XML")]
