@@ -26,7 +26,9 @@ import Control.Applicative
 import Control.Monad
 import Data.Implicit
 import Data.Time
-import Text.RSS.Syntax
+import Text.Atom.Feed   as Atom
+import Text.RSS.Syntax  as RSS2
+import Text.RSS1.Syntax as RSS1
 import System.Locale
 
 pubDate :: RSSItem -> Maybe UTCTime
@@ -56,6 +58,10 @@ instance (Functor f, LocalZone a) => LocalZone (f a) where
 instance LocalZone DateString where
   localize ds = maybe ds (formatPubDate . localizeUTC) $ parsePubDate ds
 
+{-----------------------------------------------------------------------
+-- RSS2
+-----------------------------------------------------------------------}
+
 instance LocalZone RSSItem where
   localize item = item { rssItemPubDate = localize (rssItemPubDate item) }
 
@@ -68,3 +74,23 @@ instance LocalZone RSSChannel where
 
 instance LocalZone RSS where
   localize rss @ RSS {..} = rss { rssChannel = localize rssChannel }
+
+{-----------------------------------------------------------------------
+-- Atom
+-----------------------------------------------------------------------}
+
+instance LocalZone Source where
+  localize source @ Atom.Source {..}
+    = source { sourceUpdated = localize sourceUpdated }
+
+instance LocalZone Entry where
+  localize entry @ Atom.Entry {..}
+    = entry { entryUpdated   = localize entryUpdated
+            , entryPublished = localize entryPublished
+            , entrySource    = localize entrySource
+            }
+
+instance LocalZone Atom.Feed where
+  localize atom @ Atom.Feed {..}
+    = atom { feedUpdated = localize feedUpdated
+           , feedEntries = localize feedEntries }
