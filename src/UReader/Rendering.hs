@@ -27,7 +27,10 @@ import Data.List.Split as L
 import Data.Set as S
 import Text.OPML.Syntax
 import Text.PrettyPrint.ANSI.Leijen hiding ((<$>), (<>), width)
-import Text.RSS.Syntax
+import Text.RSS1.Syntax as RSS1
+import Text.RSS.Syntax  as RSS
+import Text.Atom.Feed   as Atom
+import Text.Feed.Types  as Generic
 import Text.XML.Light.Types
 import Network.URI
 import System.IO
@@ -136,7 +139,7 @@ instance Monoid RSS where
       mergeVersions = (<>) `on` S.fromList . words
 
 instance Monoid RSSChannel where
-  mempty = nullChannel "" ""
+  mempty = RSS.nullChannel "" ""
   mappend a b = mempty
       { rssTitle = rssTitle a <> "|" <> rssTitle b
       , rssLink  = rssLink  a <> " " <> rssLink  b
@@ -153,6 +156,10 @@ instance Monoid RSSChannel where
         |   f x y   = x : mergeBy f xs (y : ys)
         | otherwise = y : mergeBy f (x : xs) ys
 
+{-----------------------------------------------------------------------
+-- RSS2
+-----------------------------------------------------------------------}
+
 instance Pretty RSS where
   pretty RSS {..} =
     pretty rssChannel </>
@@ -168,7 +175,7 @@ instance Pretty RSSChannel where
       heading title link = blue (fill 24 (text title)) </> text link
 
 instance Pretty RSSItem where
-  pretty RSSItem {..} =
+  pretty RSS.RSSItem {..} =
     (bold (magenta (pretty rssItemTitle)) </> pretty rssItemLink) <$$>
      red  (hsep $ L.map ppCategory rssItemCategories) <$$>
        indent 2 (maybe mempty ppItemDesc rssItemDescription) <$$>
@@ -176,7 +183,6 @@ instance Pretty RSSItem where
     (green (pretty rssItemGuid))            <$$>
     (yellow (pretty rssItemPubDate) </>
       maybe mempty ppAuthor rssItemAuthor)
-
     where
       ppItemDesc          = nest 2 . prettyHTML
       ppComments comments = "Comments: "  <+> pretty comments
@@ -197,3 +203,27 @@ instance Pretty RSSCategory where
 
 instance Pretty Attr where
   pretty Attr {..} = text (show attrKey) <+> "=" <+> text attrVal
+
+{-----------------------------------------------------------------------
+-- RSS1
+-----------------------------------------------------------------------}
+
+instance Pretty RSS1.Feed where
+  pretty _ = red (text "RSS1 renderer not implemented")
+
+{-----------------------------------------------------------------------
+-- Atom
+-----------------------------------------------------------------------}
+
+instance Pretty Atom.Feed where
+  pretty _ = red (text "Atom renderer not implemented")
+
+{-----------------------------------------------------------------------
+-- Generic
+-----------------------------------------------------------------------}
+
+instance Pretty Generic.Feed where
+  pretty (AtomFeed a) = pretty a
+  pretty (RSSFeed  r) = pretty r
+  pretty (RSS1Feed r) = pretty r
+  pretty (XMLFeed  e) = red (text "XML")
