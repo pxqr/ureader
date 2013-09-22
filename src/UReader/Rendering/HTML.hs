@@ -64,11 +64,15 @@ prettySoup upper raw (x : xs) = case x of
         , "tt" --> dullwhite
         , "hr" --> \body -> body <> linebreak <>
                             underline (text (L.replicate 72 ' ')) <> linebreak
+
         , "a"  --> \desc -> blue desc </> pretty (L.lookup "href" attrs)
         , "br" --> (linebreak <>)
         , "ul" --> id
         , "ol" --> id
         , "li" --> \li -> green "*" <+> li <> linebreak
+
+        , "aside" --> id
+        , "cite" --> bold
         , "span" --> id
         , "code" ~-> (onwhite . black)
         , "img"  --> \desc -> blue desc </> pretty (L.lookup "src" attrs)
@@ -80,6 +84,7 @@ prettySoup upper raw (x : xs) = case x of
         , "h4" --> heading
         , "h5" --> heading
         , "h6" --> heading
+        , "small" --> dullwhite
 
         , "div" --> \body -> linebreak <> body <> linebreak
         , "blockquote" --> indent 4
