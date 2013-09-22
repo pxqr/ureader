@@ -67,6 +67,7 @@ prettySoup upper raw (x : xs) = case x of
         , "a"  --> \desc -> blue desc </> pretty (L.lookup "href" attrs)
         , "br" --> (linebreak <>)
         , "ul" --> id
+        , "ol" --> id
         , "li" --> \li -> green "*" <+> li <> linebreak
         , "span" --> id
         , "code" ~-> (onwhite . black)
