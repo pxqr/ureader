@@ -93,6 +93,10 @@ prettySoup upper raw (x : xs) = case x of
         , "tbody" --> id
         , "tr"    --> \body -> linebreak <> body <> linebreak
         , "td"    --> fill 40
+
+        , "dl" --> id
+        , "dt" --> (<> linebreak)
+        , "dd" --> ("        " <>)
         ]
         where
           a --> f = (a, f . prettySoup False False)
