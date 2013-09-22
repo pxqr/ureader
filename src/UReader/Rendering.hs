@@ -29,7 +29,6 @@ import Text.OPML.Syntax
 import Text.PrettyPrint.ANSI.Leijen hiding ((<$>), (<>), width)
 import Text.RSS1.Syntax as RSS1
 import Text.RSS.Syntax  as RSS
-import Text.Atom.Feed   as Atom
 import Text.Feed.Types  as Generic
 import Text.XML.Light.Types
 import Network.URI
@@ -40,6 +39,7 @@ import UReader.RSS
 import UReader.Localization
 import UReader.Outline
 import UReader.Rendering.HTML
+import UReader.Rendering.Feed.Atom
 
 {-----------------------------------------------------------------------
   Feed list
@@ -211,13 +211,6 @@ instance Pretty Attr where
 
 instance Pretty RSS1.Feed where
   pretty _ = red (text "RSS1 renderer not implemented")
-
-{-----------------------------------------------------------------------
--- Atom
------------------------------------------------------------------------}
-
-instance Pretty Atom.Feed where
-  pretty _ = red (text "Atom renderer not implemented")
 
 {-----------------------------------------------------------------------
 -- Generic
