@@ -29,10 +29,11 @@
 * DONE 0.2.0.0 (breaking bump: config file format changed)
 * TODO atom
 * TODO 0.2.1.0
+* TODO "remove" command
+* TODO 0.2.2.0
+* TODO html output: ureader feed --html | lynx
 * TODO "touch" command
 * TODO uri deduplication
-* TODO add -> subscribe, remove -> unsubscribe
-* TODO "remove" command
 ** TODO suggestions if path not exists (use edit-distance package)
 * TODO 0.3.0.0
 * TODO bench
