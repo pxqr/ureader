@@ -43,10 +43,13 @@ executable ureader
                      , FlexibleContexts
   hs-source-dirs:      src
   main-is:             Main.hs
-  other-modules:       UReader.Localization
+  other-modules:       UReader.Feed
+                       UReader.Localization
                        UReader.Options
                        UReader.Rendering
-                       UReader.Feed
+                       UReader.Rendering.Feed.Atom
+                       UReader.Rendering.HTML
+                       UReader.Rendering.XHTML
 
   build-depends:       base       == 4.*
                      , implicit-params == 0.2.*
