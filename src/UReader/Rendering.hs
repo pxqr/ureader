@@ -35,11 +35,11 @@ import Network.URI
 import System.IO
 import System.Console.Terminal.Size as Terminal
 
-import UReader.RSS
+import UReader.Feed
 import UReader.Localization
 import UReader.Outline
 import UReader.Rendering.HTML
-import UReader.Rendering.Feed.Atom
+import UReader.Rendering.Feed.Atom ()
 
 {-----------------------------------------------------------------------
   Feed list

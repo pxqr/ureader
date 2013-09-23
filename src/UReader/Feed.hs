@@ -7,10 +7,11 @@
 --
 --   This module provides network related stuff.
 --
-module UReader.RSS
+module UReader.Feed
        ( filterItems
        , reverseItems
        , emptyFeed
+       , isNew
 
        , getFeed
        , fetchFeeds
@@ -31,15 +32,22 @@ import Network.URI
 import Network.Curl
 import Network.Curl.Download
 import Text.Feed.Types as Generic
+import Text.Atom.Feed  as Atom hiding (URI)
 import Text.RSS.Syntax as RSS
 import System.Locale
 
+import UReader.Localization
+
 
 -- TODO filter by time = drop . find
-filterItems :: (RSSItem -> Bool) -> Generic.Feed -> Generic.Feed
+filterItems :: (Item -> Bool) -> Generic.Feed -> Generic.Feed
+filterItems p (AtomFeed atom) = AtomFeed $ atom
+    { feedEntries = L.filter (p . Generic.AtomItem) $ feedEntries atom
+    }
 filterItems p (RSSFeed rss) = RSSFeed $ rss
     { rssChannel = let ch = rssChannel rss
-                   in ch { rssItems = L.filter p (rssItems ch) }
+                   in ch { rssItems = L.filter (p . Generic.RSSItem)
+                                      $ rssItems ch }
     } -- TODO use lens
 
 reverseItems :: Generic.Feed -> Generic.Feed
@@ -51,8 +59,11 @@ reverseItems (RSSFeed rss) = RSSFeed $ rss
 emptyFeed :: Generic.Feed -> Bool
 emptyFeed (RSSFeed rss) = L.null . rssItems . rssChannel $ rss
 
+isNew :: UTCTime -> Generic.Item -> Bool
+isNew lastSeen (Generic.RSSItem item) = pubDate item > Just lastSeen
+
 -- TODO openAsFeed
-getFeed :: URI -> IO Feed
+getFeed :: URI -> IO Generic.Feed
 getFeed uri = either (throwIO . userError) return =<< openAsFeed (show uri)
 
 hdrLastModified :: String
@@ -75,7 +86,7 @@ resourceExpired threshold uri = do
     canonicalize = L.map toLower
 
 
-getFeedUpdate :: Maybe UTCTime -> URI -> IO (Maybe Feed)
+getFeedUpdate :: Maybe UTCTime -> URI -> IO (Maybe Generic.Feed)
 getFeedUpdate  Nothing uri = Just <$> getFeed uri
 getFeedUpdate (Just t) uri = do
   updated <- resourceExpired t uri
@@ -84,7 +95,7 @@ getFeedUpdate (Just t) uri = do
     else return Nothing
 
 fetchFeeds :: Maybe UTCTime -> [URI]
-           -> IO ([(URI, SomeException)], [Feed])
+           -> IO ([(URI, SomeException)], [Generic.Feed])
 fetchFeeds mtime urls = do
     res <- parallelE (L.map (getFeedUpdate mtime) urls)
     return $ second catMaybes $ partitionEithers $ urlfy res

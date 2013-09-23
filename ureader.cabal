@@ -46,7 +46,7 @@ executable ureader
   other-modules:       UReader.Localization
                        UReader.Options
                        UReader.Rendering
-                       UReader.RSS
+                       UReader.Feed
 
   build-depends:       base       == 4.*
                      , implicit-params == 0.2.*

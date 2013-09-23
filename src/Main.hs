@@ -27,7 +27,7 @@ import UReader.Localization
 import UReader.Options
 import UReader.Outline
 import UReader.Rendering
-import UReader.RSS
+import UReader.Feed
 
 
 getLastSeen :: FilePath -> IO UTCTime
@@ -62,8 +62,7 @@ filterNew :: FilePath -> [URI] -> IO [Feed]
 filterNew feedList uris = do
   lastSeen  <- getLastSeen (feedList <.> timestampExt)
   feeds     <- fetch (Just lastSeen) uris
-  let isNew item = pubDate item > Just lastSeen
-  let userFeeds  =  L.map (filterItems isNew) feeds
+  let userFeeds  = L.map (filterItems (isNew lastSeen)) feeds
   unless (L.all emptyFeed userFeeds) $ do
     localTime <- utcToLocalTime <$> getCurrentTimeZone <*> pure lastSeen
     print $ green $ linebreak <>
