@@ -100,6 +100,8 @@ prettySoup upper raw (x : xs) = case x of
 
         , "sub" --> ("_" <>)
         , "sup" --> ("^" <>)
+
+        , "time" --> id
         ]
         where
           a --> f = (a, f . prettySoup False False)
