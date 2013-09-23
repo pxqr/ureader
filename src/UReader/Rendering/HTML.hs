@@ -97,6 +97,9 @@ prettySoup upper raw (x : xs) = case x of
         , "dl" --> id
         , "dt" --> (<> linebreak)
         , "dd" --> ("        " <>)
+
+        , "sub" --> ("_" <>)
+        , "sup" --> ("^" <>)
         ]
         where
           a --> f = (a, f . prettySoup False False)
