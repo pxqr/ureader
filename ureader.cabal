@@ -30,6 +30,13 @@ description:
 source-repository head
   type:                git
   location:            git://github.com/pxqr/ureader.git
+  branch:              master
+
+source-repository this
+  type:                git
+  location:            git://github.com/pxqr/ureader.git
+  branch:              master
+  tag:                 v0.2.0.0
 
 executable ureader
   default-language:    Haskell2010
